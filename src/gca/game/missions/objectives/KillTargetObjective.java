@@ -1,8 +1,8 @@
 package gca.game.missions.objectives;
 
-import gca.core.GPlayer;
 import gca.game.missions.Dialogue;
 import gca.game.missions.Objective;
+import gca.game.player.GPlayer;
 
 import org.bukkit.entity.EntityType;
 

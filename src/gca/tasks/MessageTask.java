@@ -1,10 +1,10 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.inventories.InventoryHandler;
 import gca.game.missions.Dialogue;
 import gca.game.missions.objectives.ApproachObjective;
+import gca.game.player.GPlayer;
 
 import java.util.ArrayList;
 import java.util.List;

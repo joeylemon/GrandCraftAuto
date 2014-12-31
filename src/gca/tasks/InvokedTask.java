@@ -1,10 +1,10 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.InvokedGroup;
 import gca.game.VillagerType;
 import gca.game.missions.objectives.EscapeCopsObjective;
+import gca.game.player.GPlayer;
 import gca.utils.ObjectType;
 import gca.utils.TextUtils;
 import gca.utils.Utils;

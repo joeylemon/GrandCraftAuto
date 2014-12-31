@@ -1,7 +1,7 @@
 package gca.game.inventories;
 
-import gca.core.GPlayer;
 import gca.game.cars.Car;
+import gca.game.player.GPlayer;
 import gca.game.weapons.Ammo;
 import gca.game.weapons.Grenade;
 import gca.game.weapons.Gun;

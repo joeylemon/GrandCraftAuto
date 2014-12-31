@@ -1,8 +1,10 @@
 package gca.core;
 
 import gca.game.Creator;
+import gca.game.Events;
 import gca.game.Gang;
 import gca.game.ItemSpawner;
+import gca.game.Rank;
 import gca.game.Skill;
 import gca.game.Tutorial;
 import gca.game.VehicleSpawner;
@@ -34,6 +36,8 @@ import gca.game.leaderboards.LeaderboardType;
 import gca.game.missions.MissionUtils;
 import gca.game.missions.SideMission;
 import gca.game.missions.SideMissionType;
+import gca.game.player.GPlayer;
+import gca.game.player.PlayerStats;
 import gca.game.weapons.Ammo;
 import gca.game.weapons.Weapon;
 import gca.tasks.FriendRequestTask;

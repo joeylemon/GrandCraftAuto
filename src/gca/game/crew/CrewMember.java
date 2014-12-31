@@ -1,6 +1,6 @@
 package gca.game.crew;
 
-import gca.core.GPlayer;
+import gca.game.player.GPlayer;
 
 public interface CrewMember {
 	

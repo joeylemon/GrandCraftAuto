@@ -1,7 +1,7 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
+import gca.game.player.GPlayer;
 
 import org.bukkit.scheduler.BukkitRunnable;
 

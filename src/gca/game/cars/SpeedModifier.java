@@ -1,11 +1,11 @@
 package gca.game.cars;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.Skill;
 import gca.game.jobs.JobInstance;
 import gca.game.jobs.JobState;
 import gca.game.jobs.Race;
+import gca.game.player.GPlayer;
 import gca.utils.Utils;
 
 import org.bukkit.entity.Minecart;

@@ -1,8 +1,8 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.apartment.Apartment;
+import gca.game.player.GPlayer;
 import gca.utils.EffectUtils;
 import gca.utils.Utils;
 

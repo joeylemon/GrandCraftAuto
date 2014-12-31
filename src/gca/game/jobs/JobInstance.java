@@ -1,7 +1,7 @@
 package gca.game.jobs;
 
-import gca.core.GPlayer;
 import gca.core.Main;
+import gca.game.player.GPlayer;
 import gca.utils.Utils;
 
 import java.util.ArrayList;

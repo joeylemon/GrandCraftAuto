@@ -1,7 +1,7 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
+import gca.game.player.GPlayer;
 import gca.utils.ParticleEffect;
 import gca.utils.ParticleUtils;
 import gca.utils.Utils;

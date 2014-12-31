@@ -1,8 +1,8 @@
 package gca.game.gps;
 
-import gca.core.GPlayer;
 import gca.game.apartment.Apartment;
 import gca.game.missions.objectives.ReachDestinationObjective;
+import gca.game.player.GPlayer;
 import gca.utils.Utils;
 
 import java.util.List;

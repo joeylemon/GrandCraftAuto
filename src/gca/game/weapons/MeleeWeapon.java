@@ -1,6 +1,6 @@
 package gca.game.weapons;
 
-import gca.core.Rank;
+import gca.game.Rank;
 
 import java.util.List;
 

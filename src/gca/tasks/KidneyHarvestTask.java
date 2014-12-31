@@ -1,8 +1,8 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.inventories.InventoryHandler;
+import gca.game.player.GPlayer;
 import gca.utils.Utils;
 
 import org.bukkit.ChatColor;

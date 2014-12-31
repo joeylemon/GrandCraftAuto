@@ -1,12 +1,12 @@
 package gca.utils;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.Skill;
 import gca.game.VillagerType;
 import gca.game.garage.Garage;
 import gca.game.gps.PathEffect;
 import gca.game.pathfinding.Tile;
+import gca.game.player.GPlayer;
 import gca.game.weapons.Gun;
 import gca.game.weapons.Shotgun;
 

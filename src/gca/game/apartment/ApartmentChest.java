@@ -1,6 +1,6 @@
 package gca.game.apartment;
 
-import gca.core.GPlayer;
+import gca.game.player.GPlayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

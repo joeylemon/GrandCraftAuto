@@ -1,7 +1,7 @@
 package gca.game;
 
-import gca.core.GPlayer;
 import gca.core.Main;
+import gca.game.player.GPlayer;
 import gca.tasks.MessageTask;
 import gca.utils.Utils;
 

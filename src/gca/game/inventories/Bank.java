@@ -1,6 +1,6 @@
 package gca.game.inventories;
 
-import gca.core.GPlayer;
+import gca.game.player.GPlayer;
 import gca.utils.TextUtils;
 import gca.utils.Utils;
 

@@ -1,9 +1,9 @@
 package gca.tasks;
 
-import gca.core.GPlayer;
 import gca.core.Main;
 import gca.game.missions.objectives.HoldUpObjective;
 import gca.game.missions.objectives.RobStationObjective;
+import gca.game.player.GPlayer;
 import gca.utils.Utils;
 
 import org.bukkit.ChatColor;
