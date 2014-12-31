@@ -11,3 +11,4 @@ A SaiCo Gaming Minecraft server plugin that imitates Rockstar's Grand Theft Auto
    - Crews
    - Cops
    - Prostitutes
+See http://thelegendcraft.net/forums/threads/grand-craft-auto-beta-test-signups.6952/ for a more in-depth explanation and feature list.
