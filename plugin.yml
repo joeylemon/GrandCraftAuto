@@ -2,7 +2,7 @@ name: GrandCraftAuto
 main: gca.core.Main
 description: Grand Theft Auto V - Minecraft!
 author: JjPwN1
-version: 0.1
+version: 0.1.1
 depend: [uCars, Citizens, WorldEdit, WorldGuard]
 softdepend: [HolographicDisplays]
 commands:

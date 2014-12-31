@@ -1118,27 +1118,18 @@ public class GPlayer implements CrewMember{
 			end = end.subtract(0, 1, 0);
 		}
 		if(start.distance(end) < 200){
-			try {
-				//create our pathfinder
+			try{
 				AStar path = new AStar(start, end, 200);
-				//get the list of nodes to walk to as a Tile object
 				ArrayList<Tile> route = path.iterate();
-				//get the result of the path trace
 				PathingResult result = path.getPathingResult();
-
-				switch(result){
-				case SUCCESS : 
-					//Path was successfull. Do something here.
+				
+				if(result == PathingResult.SUCCESS){
 					Utils.createPathEffect(player, start, end, route);
 					this.sendNotification("GPS", "You have set your destination to " + gold + destination + gray + "!");
-					break;
-				case NO_PATH :
-					//No path found, throw error.
+				}else{
 					this.sendNotification("GPS", "A valid path could not be found.");
-					break;
 				}
-			} catch (InvalidPathException e) {
-				//InvalidPathException will be thrown if start or end block is air
+			}catch (InvalidPathException e){
 				this.sendNotification("GPS", "A valid path could not be found.");
 			}
 		}else{

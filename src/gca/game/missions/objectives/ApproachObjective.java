@@ -9,24 +9,18 @@ import org.bukkit.inventory.ItemStack;
 
 public class ApproachObjective extends Objective{
 
-	private Character toApproach;
-	private ItemStack itemToGive;
-	private Material itemToReturn;
-	private int amountItemToReturn;
+	private Character approach;
+	private ItemStack toGive;
+	private Material toReturn;
+	private int amountToReturn;
 	private boolean autoDialogue;
 	
-	/**
-	 * An objective for approaching a specific NPC
-	 * @param objDesc - The description of the objective
-	 * @param objDialogue - The dialogue after completing the objective
-	 * @param objToApproach - The name of the NPC to approach
-	 */
-	public ApproachObjective(String objDesc, Dialogue objDialogue, Character lamar, ItemStack itemToGive, Material itemToReturn, int amountItemToReturn, boolean autoDialogue){
-		super(objDesc, objDialogue);
-		this.toApproach = lamar;
-		this.itemToGive = itemToGive;
-		this.itemToReturn = itemToReturn;
-		this.amountItemToReturn = amountItemToReturn;
+	public ApproachObjective(String desc, Dialogue dialogue, Character approach, ItemStack toGive, Material toReturn, int amountToReturn, boolean autoDialogue){
+		super(desc, dialogue);
+		this.approach = approach;
+		this.toGive = toGive;
+		this.toReturn = toReturn;
+		this.amountToReturn = amountToReturn;
 		this.autoDialogue = autoDialogue;
 	}
 	
@@ -35,7 +29,7 @@ public class ApproachObjective extends Objective{
 	 * @return The character to approach
 	 */
 	public Character getToApproach(){
-		return toApproach;
+		return approach;
 	}
 	
 	/**
@@ -43,7 +37,7 @@ public class ApproachObjective extends Objective{
 	 * @return The item to give to the player after approaching
 	 */
 	public ItemStack getItemToGive(){
-		return itemToGive;
+		return toGive;
 	}
 	
 	/**
@@ -51,7 +45,7 @@ public class ApproachObjective extends Objective{
 	 * @return The type of item the player has to return
 	 */
 	public Material getItemToReturn(){
-		return itemToReturn;
+		return toReturn;
 	}
 	
 	/**
@@ -59,7 +53,7 @@ public class ApproachObjective extends Objective{
 	 * @return The amount of items the player has to return
 	 */
 	public int getAmountOfItemToReturn(){
-		return amountItemToReturn;
+		return amountToReturn;
 	}
 	
 	/**

@@ -29,16 +29,6 @@ public class Weapon implements Reward {
 	private double damage;
 	private Rank rank;
 	
-	/**
-	 * Create a new weapon
-	 * @param weaponName - The name of the weapon
-	 * @param weaponType - The type of weapon it is
-	 * @param weaponLore - Some lore for the weapon
-	 * @param weaponCost - The cost of the weapon
-	 * @param weaponMinLevel - The minimum level needed to buy the weapon
-	 * @param weaponMaterial - The material of the weapon
-	 * @param weaponDamage - The damage of the weapon's bullet(s)
-	 */
 	public Weapon(String name, WeaponType type, List<String> lore, int cost, int minLevel, Material material, double damage, Rank rank){
 		this.name = name;
 		this.type = type;

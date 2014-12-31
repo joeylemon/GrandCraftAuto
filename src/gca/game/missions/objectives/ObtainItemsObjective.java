@@ -14,14 +14,6 @@ public class ObtainItemsObjective extends Objective{
 	private VillagerType toInvoke;
 	private String gangToInvoke;
 	
-	/**
-	 * An objective for collecting a certain amount of material
-	 * @param objDesc - The description of the objective
-	 * @param objDialogue - The dialogue after completing the objective
-	 * @param objItemType - The type of item to be collected
-	 * @param objAmount - The amount of the item to be collected
-	 * @param objAmount - The type of villager to be invoked for obtaining the item
-	 */
 	public ObtainItemsObjective(String desc, Dialogue dialogue, Material itemType, int amount, VillagerType toInvoke, String gangToInvoke){
 		super(desc, dialogue);
 		this.itemType = itemType;

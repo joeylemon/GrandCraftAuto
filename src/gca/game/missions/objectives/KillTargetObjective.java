@@ -12,19 +12,11 @@ public class KillTargetObjective extends Objective {
 	private int amountToKill;
 	private String targetName;
 	
-	/**
-	 * An objective for killing a certain amount of a specific entity type
-	 * @param objDesc - The description of the objective
-	 * @param objDialogue - The dialogue after completing the objective
-	 * @param objTarget - The type of entity to be killed
-	 * @param objAmountToKill - The amount of the entity to be killed
-	 * @param objTargetName - The name of the entity (this is optional)
-	 */
-	public KillTargetObjective(String objDesc, Dialogue objDialogue, EntityType objTarget, int objAmountToKill, String objTargetName){
-		super(objDesc, objDialogue);
-		target = objTarget;
-		amountToKill = objAmountToKill;
-		targetName = objTargetName;
+	public KillTargetObjective(String desc, Dialogue dialogue, EntityType target, int amountToKill, String targetName){
+		super(desc, dialogue);
+		this.target = target;
+		this.amountToKill = amountToKill;
+		this.targetName = targetName;
 	}
 	
 	/**

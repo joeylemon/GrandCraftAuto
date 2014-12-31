@@ -11,11 +11,11 @@ public class ReturnVehicleObjective extends Objective{
 	private Character returnTo;
 	private String carOwner;
 	
-	public ReturnVehicleObjective(String objDesc, Dialogue objDialogue, Car objCar, Character objReturnTo, String objCarOwner){
-		super(objDesc, objDialogue);
-		car = objCar;
-		returnTo = objReturnTo;
-		carOwner = objCarOwner;
+	public ReturnVehicleObjective(String desc, Dialogue dialogue, Car car, Character returnTo, String carOwner){
+		super(desc, dialogue);
+		this.car = car;
+		this.returnTo = returnTo;
+		this.carOwner = carOwner;
 	}
 	
 	/**

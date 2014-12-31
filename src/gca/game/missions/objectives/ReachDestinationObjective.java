@@ -9,15 +9,9 @@ public class ReachDestinationObjective extends Objective{
 
 	private Location destination;
 	
-	/**
-	 * An objective for reaching a location
-	 * @param objDesc - The description of the objective
-	 * @param objDialogue - The dialogue after completing the objective
-	 * @param objDestination - The location to be reached
-	 */
-	public ReachDestinationObjective(String objDesc, Dialogue objDialogue, Location objDestination){
-		super(objDesc, objDialogue);
-		destination = objDestination;
+	public ReachDestinationObjective(String desc, Dialogue dialogue, Location destination){
+		super(desc, dialogue);
+		this.destination = destination;
 	}
 	
 	/**

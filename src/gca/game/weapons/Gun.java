@@ -16,22 +16,6 @@ public class Gun extends Weapon {
 	private double accuracy;
 	private double range;
 	
-	/**
-	 * Create a new gun
-	 * @param name - The name of the weapon
-	 * @param type - The type of weapon it is
-	 * @param lore - Some lore for the weapon
-	 * @param cost - The cost of the weapon
-	 * @param minLevel - The minimum level needed to buy the weapon
-	 * @param material - The material of the weapon
-	 * @param ammoType - The ammo of the weapon
-	 * @param damage - The damage of the weapon's bullet(s)
-	 * @param clipSize - The amount of bullets the weapon can hold
-	 * @param roundsPerShot - The amount of bullets shot for each right click
-	 * @param firingRate - The time in ticks that a player can shoot the weapon (assuming no cooldown)
-	 * @param cooldown - The time in ticks between trigger pulls
-	 * @param accuracy - The accuracy of the gun
-	 */
 	public Gun(String name, WeaponType type, List<String> lore, int cost, int minLevel, Material material, Ammo ammoType, double damage,
 			int clipSize, int roundsPerShot, int firingRate, int cooldown, double accuracy, double range, Rank rank){
 		super(name, type, lore, cost, minLevel, material, damage, rank);
