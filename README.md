@@ -1,4 +1,4 @@
-<b>Grand Craft Auto</b>
+<font size="6"><b>Grand Craft Auto</b></font>
 
 A SaiCo Gaming Minecraft server plugin that imitates Rockstar's Grand Theft Auto V installment. It includes, but is not limited to:
    - Weapons
