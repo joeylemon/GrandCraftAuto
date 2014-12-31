@@ -1,0 +1,52 @@
+name: GrandCraftAuto
+main: gca.core.Main
+description: Grand Theft Auto V - Minecraft!
+author: JjPwN1
+version: 0.1
+depend: [uCars, Citizens, WorldEdit, WorldGuard]
+softdepend: [HolographicDisplays]
+commands:
+   gca:
+      description: GCA main command
+   grandcraftauto:
+      description: GCA main command
+   help:
+      description: Get the GCA help page
+   ?:
+      description: Get the GCA help page
+   stats:
+      description: Get a player's statistics
+   mission:
+      description: Get your mission information
+   m:
+      description: Get your mission information
+   job:
+      description: Manage your current job
+   j:
+      description: Manage your current job
+   race:
+      description: Manage your current job
+   wallet:
+      description: Get your wallet balance
+   balance:
+      description: Get your wallet balance
+   bal:
+      description: Get your wallet balance
+   apartment:
+      description: Get your apartment information
+   a:
+      description: Get your apartment information
+   crew:
+      description: Control your crew
+   c:
+      description: Control your crew
+   friends:
+      description: Manage your friends
+   friend:
+      description: Manage your friends
+   f:
+      description: Manage your friends
+   top:
+      description: Get a leaderboard
+   kick:
+      description: Kick a player
