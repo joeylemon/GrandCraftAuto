@@ -16,13 +16,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class SpawnTask extends BukkitRunnable{
 	
-	Main main = Main.getInstance();
+	private Main main = Main.getInstance();
 	private String gray = ChatColor.GRAY + "";
 	private String gold = ChatColor.GOLD + "";
 	
-	Player player;
-	GPlayer gplayer;
-	Location dest;
+	private Player player;
+	private GPlayer gplayer;
+	private Location dest;
 	public SpawnTask(Player p, Location d){
 		player = p;
 		gplayer = new GPlayer(p);

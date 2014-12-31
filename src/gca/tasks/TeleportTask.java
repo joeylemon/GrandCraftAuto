@@ -18,7 +18,7 @@ public class TeleportTask extends BukkitRunnable{
 		this.toTeleportTo = toTeleportTo;
 	}
 	
-	int timer = 6;
+	private int timer = 6;
 	
 	public void run(){
 		if(timer > 0){

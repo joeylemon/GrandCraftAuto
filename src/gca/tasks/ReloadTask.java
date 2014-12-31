@@ -11,11 +11,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class ReloadTask extends BukkitRunnable{
 	
-	Player player;
-	Gun gun;
-	ItemStack item;
-	int maxdura;
-	int reloadpersecond;
+	private Main main = Main.getInstance();
+	
+	private Player player;
+	private Gun gun;
+	private ItemStack item;
+	private int maxdura;
+	private int reloadpersecond;
 	public ReloadTask(Player p, Gun g){
 		gun = g;
 		player = p;
@@ -52,14 +54,14 @@ public class ReloadTask extends BukkitRunnable{
 					}
 				}
 			}else{
-				if(Main.getInstance().reloading.containsKey(player.getName())){
-					Main.getInstance().reloading.remove(player.getName());
+				if(main.reloading.containsKey(player.getName())){
+					main.reloading.remove(player.getName());
 				}
 				this.cancel();
 			}
 		}else{
-			if(Main.getInstance().reloading.containsKey(player.getName())){
-				Main.getInstance().reloading.remove(player.getName());
+			if(main.reloading.containsKey(player.getName())){
+				main.reloading.remove(player.getName());
 			}
 			this.cancel();
 		}

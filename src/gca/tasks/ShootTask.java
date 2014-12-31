@@ -9,17 +9,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class ShootTask extends BukkitRunnable{
 	
-	Main main = Main.getInstance();
-	int roundsShot = 0;
+	private Main main = Main.getInstance();
 	
-	Player player;
-	Gun gun;
+	private Player player;
+	private Gun gun;
 	public ShootTask(Player p, Gun g){
 		player = p;
 		gun = g;
 	}
 	
-	int cooldown = 0;
+	private int roundsShot = 0;
+	private int cooldown = 0;
 	
 	@Override
 	public void run(){
