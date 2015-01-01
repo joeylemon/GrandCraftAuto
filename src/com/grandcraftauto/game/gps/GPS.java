@@ -25,11 +25,12 @@ public final class GPS {
 	public static final Inventory getInventory(Player player){
 		GPlayer gplayer = new GPlayer(player);
 		Inventory inv = Bukkit.createInventory(null, 18, ChatColor.DARK_GRAY + "GPS");
-		inv.setItem(2, Utils.renameItem(new ItemStack(Material.IRON_HOE), ChatColor.DARK_RED + "Ammu" + ChatColor.WHITE + "Nation"));
-		inv.setItem(3, Utils.renameItem(new ItemStack(Material.COOKED_BEEF), ChatColor.DARK_AQUA + "Burgershot"));
-		inv.setItem(4, Utils.renameItem(new ItemStack(Material.MINECART), ChatColor.GRAY + "Car Dealership"));
-		inv.setItem(5, Utils.renameItem(new ItemStack(Material.SKULL_ITEM), ChatColor.DARK_GRAY + "Black Market"));
-		inv.setItem(6, Utils.renameItem(new ItemStack(Material.GOLD_NUGGET), ChatColor.GOLD + "Bank"));
+		inv.setItem(1, Utils.renameItem(new ItemStack(Material.IRON_HOE), ChatColor.DARK_RED + "Ammu" + ChatColor.WHITE + "Nation"));
+		inv.setItem(2, Utils.renameItem(new ItemStack(Material.MINECART), ChatColor.GRAY + "Car Dealership"));
+		inv.setItem(3, Utils.renameItem(new ItemStack(Material.WOOD_DOOR), ChatColor.GOLD + "Apartment Complex"));
+		inv.setItem(5, Utils.renameItem(new ItemStack(Material.GOLD_NUGGET), ChatColor.GOLD + "Bank"));
+		inv.setItem(6, Utils.renameItem(new ItemStack(Material.COOKED_BEEF), ChatColor.DARK_AQUA + "Burgershot"));
+		inv.setItem(7, Utils.renameItem(new ItemStack(Material.SKULL_ITEM), ChatColor.DARK_GRAY + "Black Market"));
 		if(gplayer.hasApartment() == false){
 			inv.setItem(13, Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.DARK_RED + "Cancel Route"));
 		}
@@ -82,7 +83,7 @@ public final class GPS {
 		for(Entity e : Utils.getGCAWorld().getEntities()){
 			if(e instanceof Player){
 				Player p = (Player) e;
-				if(ChatColor.stripColor(p.getName()).toLowerCase().contains(dest.toString().toLowerCase().replaceAll("_", " "))){
+				if(ChatColor.stripColor(p.getName()).toLowerCase().contains(dest.getKeyword())){
 					boolean replace = true;
 					if(nearest != null){
 						if(nearest.distance(player.getLocation()) < e.getLocation().distance(player.getLocation())){

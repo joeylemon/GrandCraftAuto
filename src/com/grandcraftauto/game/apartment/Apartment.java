@@ -14,13 +14,11 @@ import com.grandcraftauto.utils.Utils;
 
 public class Apartment {
 	
-	static Main main = Main.getInstance();
+	private static Main main = Main.getInstance();
+	private static List<Apartment> apartments = new ArrayList<Apartment>();
 	
 	private int id;
-	/**
-	 * Create a new apartment
-	 * @param aptID - The ID of the apartment
-	 */
+	
 	public Apartment(int aptID){
 		id = aptID;
 	}
@@ -282,14 +280,19 @@ public class Apartment {
 	}
 	
 	/**
+	 * Initialize the apartment list for usage
+	 */
+	public static final void initializeList(){
+		for(int x = 1; x <= getTotalApartments(); x++){
+			apartments.add(new Apartment(x));
+		}
+	}
+	
+	/**
 	 * Get the list of apartments
 	 * @return The list of apartments
 	 */
 	public static final List<Apartment> list(){
-		List<Apartment> apartments = new ArrayList<Apartment>();
-		for(int x = 1; x <= getTotalApartments(); x++){
-			apartments.add(new Apartment(x));
-		}
 		return apartments;
 	}
 }

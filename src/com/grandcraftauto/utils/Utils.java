@@ -50,12 +50,16 @@ import com.gmail.filoghost.holograms.utils.VisibilityManager;
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.game.Skill;
 import com.grandcraftauto.game.VillagerType;
+import com.grandcraftauto.game.apartment.Apartment;
 import com.grandcraftauto.game.garage.Garage;
 import com.grandcraftauto.game.gps.PathEffect;
+import com.grandcraftauto.game.inventories.Store;
+import com.grandcraftauto.game.jobs.Job;
 import com.grandcraftauto.game.pathfinding.Tile;
 import com.grandcraftauto.game.player.GPlayer;
 import com.grandcraftauto.game.weapons.Gun;
 import com.grandcraftauto.game.weapons.Shotgun;
+import com.grandcraftauto.game.weapons.Weapon;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -83,6 +87,16 @@ public final class Utils {
 	    	return null;
 	    }
 	    return (WorldGuardPlugin) plugin;
+	}
+	
+	/**
+	 * Set up required lists for usage
+	 */
+	public static final void initialize(){
+		Weapon.initializeList();
+		Apartment.initializeList();
+		Store.initializeList();
+		Job.initializeList();
 	}
 	
 	/**

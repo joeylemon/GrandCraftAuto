@@ -40,7 +40,6 @@ import com.grandcraftauto.game.garage.GarageInstance;
 import com.grandcraftauto.game.gps.PathEffect;
 import com.grandcraftauto.game.inventories.InventoryHandler;
 import com.grandcraftauto.game.inventories.Slot;
-import com.grandcraftauto.game.inventories.Store;
 import com.grandcraftauto.game.jobs.FreeForAll;
 import com.grandcraftauto.game.jobs.FreeForAllCreator;
 import com.grandcraftauto.game.jobs.Job;
@@ -68,13 +67,13 @@ import com.grandcraftauto.tasks.ReloadTask;
 import com.grandcraftauto.tasks.RobTask;
 import com.grandcraftauto.tasks.TeleportTask;
 import com.grandcraftauto.utils.EntityHider;
+import com.grandcraftauto.utils.EntityHider.Policy;
 import com.grandcraftauto.utils.Help;
 import com.grandcraftauto.utils.ObjectType;
 import com.grandcraftauto.utils.ParticleEffect;
 import com.grandcraftauto.utils.ParticleUtils;
 import com.grandcraftauto.utils.TextUtils;
 import com.grandcraftauto.utils.Utils;
-import com.grandcraftauto.utils.EntityHider.Policy;
 import com.useful.uCarsAPI.uCarsAPI;
 
 public class Main extends JavaPlugin{
@@ -151,9 +150,7 @@ public class Main extends JavaPlugin{
 		manager = Bukkit.getScoreboardManager();
 		uCarsAPI.getAPI().hookPlugin(this);
 		uCarsAPI.getAPI().registerSpeedMod(this, new SpeedModifier());
-		Weapon.initializeList();
-		Store.initializeList();
-		Job.initializeList();
+		Utils.initialize();
 		this.getServer().getPluginManager().registerEvents(new Events(), this);
 		for(Entity e : Utils.getGCAWorld().getEntities()){
 			if(!(e instanceof Player)){
@@ -935,7 +932,11 @@ public class Main extends JavaPlugin{
 						if(gplayer.hasApartment() == true){
 							gplayer.sendMessageHeader("Apartments");
 							for(Apartment a : gplayer.getApartments()){
-								gplayer.sendMessage(gold + a.getName());
+								if(gplayer.getPrimaryApartment().getName().equalsIgnoreCase(a.getName()) == true){
+									gplayer.sendMessage(gold + a.getName() + gray + " (" + gold + "Primary" + gray + ")");
+								}else{
+									gplayer.sendMessage(gold + a.getName());
+								}
 								player.sendMessage("  " + gold + "-" + gray + ChatColor.ITALIC + " Location: "
 										+ "(" + a.getSpawn().getBlockX() + ", " + a.getSpawn().getBlockY() + ", " + a.getSpawn().getBlockZ() + ")");
 							}

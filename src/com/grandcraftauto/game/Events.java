@@ -677,7 +677,8 @@ public class Events implements Listener{
 							if(gplayer.getTotalApartments() < gplayer.getMaximumApartments()){
 								Apartment apt = null;
 								for(Apartment a : Apartment.list()){
-									if(a.getSignLocation().distance(sign.getLocation()) < 1){
+									if(a.getSignLocation().getBlockX() == sign.getLocation().getBlockX() && a.getSignLocation().getBlockY() == sign.getLocation().getBlockY() && 
+											a.getSignLocation().getBlockZ() == sign.getLocation().getBlockZ()){
 										apt = a;
 										break;
 									}
@@ -688,8 +689,9 @@ public class Events implements Listener{
 											gplayer.setWalletBalance(gplayer.getWalletBalance() - apt.getPrice());
 											gplayer.addApartment(apt);
 											gplayer.sendMessage("You now have the keys to " + gold + apt.getName() + gray + "!");
+											gplayer.refreshScoreboard();
 										}else{
-											gplayer.sendMessage("You need $" + gold + (apt.getPrice() - gplayer.getWalletBalance()) + gray + " more to purchase this apartment!");
+											gplayer.sendMessage("You need " + gold + "$" + (apt.getPrice() - gplayer.getWalletBalance()) + gray + " more to purchase this apartment!");
 										}
 									}else{
 										gplayer.sendError("You already own this apartment!");
@@ -2314,6 +2316,8 @@ public class Events implements Listener{
 					}
 				}else if(npc.getName().contains("Bank")){
 					player.openInventory(Bank.getInventory(gplayer, BankInventory.WITHDRAW_DEPOSIT));
+				}else if(npc.getName().contains("Manager")){
+					gplayer.sendMessage(gold + "Manager: " + gray + "Feel free to tour my apartment complex!");
 				}
 			}else{
 				ItemStack item = player.getItemInHand();
