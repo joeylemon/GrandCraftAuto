@@ -1,5 +1,5 @@
 name: GrandCraftAuto
-main: com.grandcraftauto.core.Main
+main: gca.core.Main
 description: Grand Theft Auto V - Minecraft!
 author: JjPwN1
 version: 0.1.1
