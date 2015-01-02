@@ -37,8 +37,8 @@ public class SpawnTask extends BukkitRunnable{
 			}else{
 				player.setFlying(false);
 				player.setAllowFlight(false);
-				if(Main.getInstance().spawning.contains(player.getName())){
-					Main.getInstance().spawning.remove(player.getName());
+				if(main.spawning.contains(player.getName())){
+					main.spawning.remove(player.getName());
 				}
 				player.teleport(dest);
 				gplayer.sendMessage("Welcome to the " + gold + "Grand Craft Auto v" + main.getDescription().getVersion() + gray + " beta testing!");
@@ -79,8 +79,8 @@ public class SpawnTask extends BukkitRunnable{
 			}
 			EffectUtils.playSpawnSound(player);
 		}else{
-			if(Main.getInstance().spawning.contains(player.getName())){
-				Main.getInstance().spawning.remove(player.getName());
+			if(main.spawning.contains(player.getName())){
+				main.spawning.remove(player.getName());
 			}
 			this.cancel();
 		}
