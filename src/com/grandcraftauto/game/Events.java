@@ -685,13 +685,15 @@ public class Events implements Listener{
 								}
 								if(apt != null){
 									if(gplayer.ownsApartment(apt) == false){
-										if(gplayer.getWalletBalance() >= apt.getPrice()){
-											gplayer.setWalletBalance(gplayer.getWalletBalance() - apt.getPrice());
+										int price = apt.getPrice();
+										double wallet = gplayer.getWalletBalance();
+										if(wallet >= price){
+											gplayer.setWalletBalance(wallet - price);
 											gplayer.addApartment(apt);
 											gplayer.sendMessage("You now have the keys to " + gold + apt.getName() + gray + "!");
 											gplayer.refreshScoreboard();
 										}else{
-											gplayer.sendMessage("You need " + gold + "$" + (apt.getPrice() - gplayer.getWalletBalance()) + gray + " more to purchase this apartment!");
+											gplayer.sendMessage("You need " + gold + "$" + (price - wallet) + gray + " more to purchase this apartment!");
 										}
 									}else{
 										gplayer.sendError("You already own this apartment!");
