@@ -41,8 +41,7 @@ public class SpawnTask extends BukkitRunnable{
 					Main.getInstance().spawning.remove(player.getName());
 				}
 				player.teleport(dest);
-				gplayer.sendMessage("Welcome to the " + gold + "Grand Craft Auto " + gray + "beta testing!");
-				gplayer.sendMessage("You are currently playing on " + gold + "GCA v" + main.getDescription().getVersion() + gray + "!");
+				gplayer.sendMessage("Welcome to the " + gold + "Grand Craft Auto v" + main.getDescription().getVersion() + gray + " beta testing!");
 				if(gplayer.hasApartment() == true){
 					List<Apartment> rent = new ArrayList<Apartment>();
 					for(Apartment a : gplayer.getApartments()){
