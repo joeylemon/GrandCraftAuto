@@ -36,8 +36,7 @@ public class SpeedModifier implements CarSpeedModifier{
 					if(main.currentcar.containsKey(player.getName())){
 						speed = travelVector.multiply(main.currentcar.get(player.getName()).getSpeed());
 					}
-					double driving = 1;
-					driving += (gplayer.getSkillLevel(Skill.DRIVING) * .0015);
+					double driving = 1 + (gplayer.getSkillLevel(Skill.DRIVING) * .0015);
 					return speed.multiply(driving);
 				}else{
 					return travelVector.multiply(.375);

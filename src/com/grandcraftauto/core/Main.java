@@ -185,9 +185,7 @@ public class Main extends JavaPlugin{
 					playtime.put(p.getName(), (time + 1));
 					
 					if(p.getFoodLevel() >= 20 && p.getHealth() < 20){
-						double toAdd = 0.35;
-						toAdd += (gp.getSkillLevel(Skill.HEALTH) * .004);
-						double newhealth = p.getHealth() + toAdd;
+						double newhealth = p.getHealth() + (0.35 + (gp.getSkillLevel(Skill.HEALTH) * .004));
 						if(newhealth <= 20){
 							p.setHealth(newhealth);
 						}else{
