@@ -3,13 +3,11 @@ package com.grandcraftauto.utils;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import net.minecraft.server.v1_8_R1.EntityInsentient;
+import net.minecraft.server.v1_8_R2.EntityInsentient;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,7 +18,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R1.entity.CraftLivingEntity;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_8_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -43,10 +42,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.gmail.filoghost.holograms.object.HologramBase;
-import com.gmail.filoghost.holograms.utils.VisibilityManager;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.game.Skill;
 import com.grandcraftauto.game.VillagerType;
@@ -55,6 +52,7 @@ import com.grandcraftauto.game.garage.Garage;
 import com.grandcraftauto.game.gps.PathEffect;
 import com.grandcraftauto.game.inventories.Store;
 import com.grandcraftauto.game.jobs.Job;
+import com.grandcraftauto.game.missions.Character;
 import com.grandcraftauto.game.pathfinding.Tile;
 import com.grandcraftauto.game.player.GPlayer;
 import com.grandcraftauto.game.weapons.Gun;
@@ -68,10 +66,13 @@ public final class Utils {
 	
 	private static Main main = Main.getInstance();
 	private static World world = null;
+	private static WorldGuardPlugin wgplugin = null;
+	private static int dropID = 0;
 	private static final String gray = ChatColor.GRAY + "";
 	private static final String gold = ChatColor.GOLD + "";
 	private static final Random rand = new Random();
-	private static final String[] blockedcmds = {"/me"};
+	private static final String[] blockedcmds = {"/me", "/bukkit:me"};
+	private static final Material[] blockedinteract = {Material.TRAP_DOOR, Material.FURNACE, Material.DROPPER, Material.HOPPER, Material.ANVIL, Material.ENDER_CHEST};
 	private static final int maxY = 80;
 	private static final int minY = 67;
 	
@@ -81,12 +82,15 @@ public final class Utils {
 	 * Get the WorldGuardPlugin
 	 * @return - The WorldGuardPlugin
 	 */
-	public static final WorldGuardPlugin getWorldGuard() {
-	    Plugin plugin = main.getServer().getPluginManager().getPlugin("WorldGuard");
-	    if(plugin == null || !(plugin instanceof WorldGuardPlugin)) {
-	    	return null;
-	    }
-	    return (WorldGuardPlugin) plugin;
+	public static final WorldGuardPlugin getWorldGuard(){
+		if(wgplugin == null){
+		    Plugin plugin = main.getServer().getPluginManager().getPlugin("WorldGuard");
+		    if(plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+		    	return null;
+		    }
+		    wgplugin = (WorldGuardPlugin) plugin;
+		}
+		return wgplugin;
 	}
 	
 	/**
@@ -97,6 +101,18 @@ public final class Utils {
 		Apartment.initializeList();
 		Store.initializeList();
 		Job.initializeList();
+		Utils.setupApartmentDoors();
+	}
+	
+	/**
+	 * Set up the apartment doors list
+	 */
+	public static final void setupApartmentDoors(){
+		for(Apartment a : Apartment.list()){
+			for(Location l : a.getDoorLocations()){
+				main.apartmentDoors.add(l);
+			}
+		}
 	}
 	
 	/**
@@ -109,6 +125,21 @@ public final class Utils {
 		boolean is = false;
 		ApplicableRegionSet set = getWorldGuard().getRegionManager(loc.getWorld()).getApplicableRegions(loc);
         if(set.allows(DefaultFlag.PISTONS) == false){
+        	is = true;
+        }
+        return is;
+	}
+	
+	/**
+	 * Check if the location is a safezone
+	 * @param loc - The location to check for a safezone
+	 * @return True or false depending on if the location is a safezone or not
+	 */
+	@SuppressWarnings("deprecation")
+	public static final boolean isSafezone(Location loc){
+		boolean is = false;
+		ApplicableRegionSet set = getWorldGuard().getRegionManager(loc.getWorld()).getApplicableRegions(loc);
+        if(set.allows(DefaultFlag.ENDERDRAGON_BLOCK_DAMAGE) == false){
         	is = true;
         }
         return is;
@@ -516,6 +547,35 @@ public final class Utils {
 	}
 	
 	/**
+	 * Get the bottom door block of a door
+	 * @param block - The door
+	 * @return The bottom door block of a door
+	 */
+	public static final Block getBottomDoor(Block block){
+		if(block.getRelative(BlockFace.DOWN).getType() == Material.WOODEN_DOOR){
+			return block.getRelative(BlockFace.DOWN);
+		}else{
+			return block;
+		}
+	}
+	
+	/**
+	 * Check if the block is an apartment door
+	 * @param loc - The location of the block
+	 * @return True if the block is an apartment door, false if not
+	 */
+	public static final boolean isApartmentDoor(Location loc){
+		boolean is = false;
+		for(Location l : main.apartmentDoors){
+			if(l.getX() == loc.getX() && l.getY() == loc.getY() && l.getZ() == loc.getZ()){
+				is = true;
+				break;
+			}
+		}
+		return is;
+	}
+	
+	/**
 	 * Set the color of leather armor
 	 * @param armor - The armor itemstack to color
 	 * @param color - The color to set the armor to
@@ -576,7 +636,7 @@ public final class Utils {
 			if(y <= maxY && y >= minY){
 				Location loc = new Location(Utils.getGCAWorld(), x, y, z);
 				if(loc.getBlock().getLightLevel() > 2){
-					int chance = Utils.randInt(1, 7);
+					int chance = Utils.randInt(1, 11);
 					if(chance == 1){
 						villager = Utils.spawnCop(loc);
 					}else{
@@ -602,7 +662,7 @@ public final class Utils {
 	 * @param loc - The location to drop money at
 	 */
 	public static final Item dropMoney(Location loc){
-		return dropMoney(loc, 8, 17);
+		return dropMoney(loc, 4, 10);
 	}
 	
 	/**
@@ -610,9 +670,7 @@ public final class Utils {
 	 * @param loc - The location to drop money at
 	 */
 	public static final Item dropMoney(Location loc, int min, int max){
-		Item item = getGCAWorld().dropItem(loc, new ItemStack(Material.GOLD_NUGGET));
-		item.setMetadata("value", new FixedMetadataValue(main, randInt(min, max)));
-		return item;
+		return dropMoney(loc, randInt(min, max));
 	}
 	
 	/**
@@ -621,7 +679,8 @@ public final class Utils {
 	 */
 	public static final Item dropMoney(Location loc, int amount){
 		Item item = getGCAWorld().dropItem(loc, new ItemStack(Material.GOLD_NUGGET));
-		item.setMetadata("value", new FixedMetadataValue(main, amount));
+		Utils.renameItem(item.getItemStack(), amount + "", dropID + "");
+		dropID++;
 		return item;
 	}
 	
@@ -683,13 +742,38 @@ public final class Utils {
 	}
 	
 	/**
+	 * Get the c4 item
+	 * @param amount - The amount of c4 to get
+	 * @return The c4 item
+	 */
+	public static final ItemStack getC4Item(){
+		return renameItem(new ItemStack(Material.LEVER, 1), ChatColor.DARK_GREEN + "C4 Explosive");
+	}
+	
+	/**
 	 * Get the phone inventory
 	 * @return The phone inventory
 	 */
 	public static final Inventory getPhoneInventory(){
 		Inventory inv = Bukkit.createInventory(null, 9, ChatColor.DARK_GRAY + "iFruit Cell Phone");
-		inv.setItem(3, Utils.renameItem(new ItemStack(Material.ENCHANTED_BOOK), ChatColor.AQUA + "Skills"));
-		inv.setItem(5, Utils.renameItem(new ItemStack(Material.SKULL_ITEM, 1, (short) 3), ChatColor.RED + "Bounty Placer"));
+		inv.setItem(1, Utils.renameItem(new ItemStack(Material.ENCHANTED_BOOK), ChatColor.AQUA + "Skills", gray + "View and upgrade your skills."));
+		inv.setItem(3, Utils.renameItem(new ItemStack(Material.SKULL_ITEM, 1, (short) 3), ChatColor.RED + "Bounty Placer", gray + "Put a bounty on someone."));
+		inv.setItem(5, Utils.renameItem(new ItemStack(Material.BOOK), gold + "Contacts", gray + "Receive missions from NPCs."));
+		inv.setItem(7, Utils.renameItem(new ItemStack(Material.MINECART), gray + "Lose the Cops (" + gold + "$175" + gray + ")", gray + "Automatically lose the cops."));
+		return inv;
+	}
+	
+	/**
+	 * Get the contacts inventory
+	 * @return The contacts inventory
+	 */
+	public static final Inventory getContactsInventory(){
+		Inventory inv = Bukkit.createInventory(null, 9, ChatColor.DARK_GRAY + "Contacts");
+		int slot = 0;
+		for(Character c : Character.values()){
+			inv.setItem(slot, Utils.renameItem(new ItemStack(Material.SKULL_ITEM, 1, (short) 3), gold + c.getName()));
+			slot++;
+		}
 		return inv;
 	}
 	
@@ -747,6 +831,22 @@ public final class Utils {
 			}
 		}
 		return blocked;
+	}
+	
+	/**
+	 * Check if a player can interact with a block type
+	 * @param mat - The type of block to check
+	 * @return True if a player can interact with the block type, false if not
+	 */
+	public static final boolean canInteract(Material mat){
+		boolean can = true;
+		for(int x = 0; x <= (blockedinteract.length - 1); x++){
+			if(mat == blockedinteract[x]){
+				can = false;
+				break;
+			}
+		}
+		return can;
 	}
 	
 	/**
@@ -893,7 +993,6 @@ public final class Utils {
 	 * @param start - The start of the path
 	 * @param tiles - The list of tiles in the path
 	 */
-	@SuppressWarnings("deprecation")
 	public static final void createPathEffect(Player player, Location start, Location end, ArrayList<Tile> tiles){
 		List<Hologram> holograms = new ArrayList<Hologram>();
 		int blocks = 0;
@@ -917,10 +1016,16 @@ public final class Utils {
 				}
 				holoCount++;
 				if(holoCount == 1){
-					Hologram hologram = HolographicDisplaysAPI.createHologram(main, tloc.add(0.5, 2.5, 0.5), color + "" + (int)distance + "m");
+					Hologram hologram = HologramsAPI.createHologram(main, tloc.add(0.5, 2.5, 0.5));
+					hologram.appendTextLine(color + "" + (int)distance + "m");
+					hologram.getVisibilityManager().showTo(player);
+					hologram.getVisibilityManager().setVisibleByDefault(false);
 					holograms.add(hologram);
 				}else if(holoCount > 1){
-					Hologram hologram = HolographicDisplaysAPI.createHologram(main, tloc.add(0.5, 2.5, 0.5), color + TextUtils.getSeperator());
+					Hologram hologram = HologramsAPI.createHologram(main, tloc.add(0.5, 2.5, 0.5));
+					hologram.appendTextLine(color + TextUtils.getSeperator());
+					hologram.getVisibilityManager().showTo(player);
+					hologram.getVisibilityManager().setVisibleByDefault(false);
 					holograms.add(hologram);
 				}
 				if(holoCount > 3){
@@ -928,22 +1033,6 @@ public final class Utils {
 				}
 			}else if(blocks >= 3){
 				blocks = 0;
-			}
-		}
-		for(Entity e : Utils.getGCAWorld().getEntities()){
-			if(e instanceof LivingEntity){
-				LivingEntity le = (LivingEntity) e;
-				if(HolographicDisplaysAPI.isHologramEntity(le) == true){
-					HologramBase h = HolographicDisplaysAPI.getNmsManager().getParentHologram(le);
-					for(Hologram holo : holograms){
-						if(h.getLocation().distance(holo.getLocation()) < 1){
-							Set<String> whoCanSee = new HashSet<String>();
-							whoCanSee.add(player.getName());
-							h.setVisibilityManager(new VisibilityManager(whoCanSee));
-							break;
-						}
-					}
-				}
 			}
 		}
 		PathEffect effect = new PathEffect(player, holograms, end);
@@ -999,6 +1088,9 @@ public final class Utils {
 	 * @return The string of bars
 	 */
 	public static final String asBars(double percent){
+		if(percent > 100){
+			percent = 100;
+		}
 		String bars = "";
 		int totalGreen = (int) ((percent * 0.1) * 3);
 		int currentGreen = 0;
@@ -1008,6 +1100,29 @@ public final class Utils {
 				currentGreen++;
 			}else{
 				bars = bars + ChatColor.DARK_GRAY + TextUtils.getBar();
+			}
+		}
+		return bars;
+	}
+	
+	/**
+	 * Return a string of bars with the given percent greened out
+	 * @param percent - The percent to fill the bars up to
+	 * @return The string of bars
+	 */
+	public static final String asSpeedBars(double percent){
+		if(percent > 100){
+			percent = 100;
+		}
+		String bars = "";
+		int totalGreen = (int) ((percent * 0.1) * 3);
+		int currentGreen = 0;
+		for(int x = 1; x <= 30; x++){
+			if(currentGreen < totalGreen){
+				bars = bars + ChatColor.GREEN + TextUtils.getDash();
+				currentGreen++;
+			}else{
+				bars = bars + ChatColor.DARK_GRAY + TextUtils.getDash();
 			}
 		}
 		return bars;

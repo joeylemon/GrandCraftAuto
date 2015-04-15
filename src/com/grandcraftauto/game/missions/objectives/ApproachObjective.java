@@ -7,21 +7,23 @@ import com.grandcraftauto.game.missions.Character;
 import com.grandcraftauto.game.missions.Dialogue;
 import com.grandcraftauto.game.missions.Objective;
 
-public class ApproachObjective extends Objective{
+public class ApproachObjective extends Objective {
 
 	private Character approach;
 	private ItemStack toGive;
 	private Material toReturn;
 	private int amountToReturn;
 	private boolean autoDialogue;
+	private boolean prostitute;
 	
-	public ApproachObjective(String desc, Dialogue dialogue, Character approach, ItemStack toGive, Material toReturn, int amountToReturn, boolean autoDialogue){
-		super(desc, dialogue);
+	public ApproachObjective(String desc, Dialogue dialogue, boolean revert, Character approach, ItemStack toGive, Material toReturn, int amountToReturn, boolean autoDialogue, boolean prostitute){
+		super(desc, dialogue, revert);
 		this.approach = approach;
 		this.toGive = toGive;
 		this.toReturn = toReturn;
 		this.amountToReturn = amountToReturn;
 		this.autoDialogue = autoDialogue;
+		this.prostitute = prostitute;
 	}
 	
 	/**
@@ -62,5 +64,13 @@ public class ApproachObjective extends Objective{
 	 */
 	public boolean shouldAutoDialogue(){
 		return autoDialogue;
+	}
+	
+	/**
+	 * Get the objective's prostitute return boolean
+	 * @return The objective's prostitute return boolean
+	 */
+	public boolean shouldReturnProstitute(){
+		return prostitute;
 	}
 }

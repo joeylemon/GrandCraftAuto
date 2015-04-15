@@ -11,8 +11,8 @@ public class HoldUpObjective extends Objective {
 	private EntityType targetType;
 	private String targetName;
 	private ItemStack itemToGet;
-	public HoldUpObjective(String description, Dialogue dialogue, EntityType targetType, String targetName, ItemStack itemToGet){
-		super(description, dialogue);
+	public HoldUpObjective(String description, Dialogue dialogue, boolean revert, EntityType targetType, String targetName, ItemStack itemToGet){
+		super(description, dialogue, revert);
 		this.targetType = targetType;
 		this.targetName = targetName;
 		this.itemToGet = itemToGet;

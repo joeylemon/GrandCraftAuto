@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
-import org.bukkit.inventory.ItemStack;
 
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.game.cars.Car;
@@ -39,15 +36,13 @@ static Main main = Main.getInstance();
 	 * Remove all vehicles spawned by the item spawner
 	 */
 	public static final void removeVehicles(){
-		for(VehicleSpawn s : getLocationsToSpawn()){
-			Item i = Utils.getGCAWorld().dropItem(s.getLocation(), new ItemStack(Material.CLAY_BALL));
-			i.setPickupDelay(1000);
-			for(Entity e : i.getNearbyEntities(2, 2, 2)){
-				if(e instanceof Minecart){
-					e.remove();
+		for(Entity e : Utils.getGCAWorld().getEntities()){
+			if(e instanceof Minecart){
+				Minecart m = (Minecart) e;
+				if(m.getPassenger() == null && m.hasMetadata("isGarageCar") == false){
+					m.remove();
 				}
 			}
-			i.remove();
 		}
 	}
 	

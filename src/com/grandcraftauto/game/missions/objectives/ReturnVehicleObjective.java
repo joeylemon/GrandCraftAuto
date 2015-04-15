@@ -11,8 +11,8 @@ public class ReturnVehicleObjective extends Objective{
 	private Character returnTo;
 	private String carOwner;
 	
-	public ReturnVehicleObjective(String desc, Dialogue dialogue, Car car, Character returnTo, String carOwner){
-		super(desc, dialogue);
+	public ReturnVehicleObjective(String desc, Dialogue dialogue, boolean revert, Car car, Character returnTo, String carOwner){
+		super(desc, dialogue, revert);
 		this.car = car;
 		this.returnTo = returnTo;
 		this.carOwner = carOwner;

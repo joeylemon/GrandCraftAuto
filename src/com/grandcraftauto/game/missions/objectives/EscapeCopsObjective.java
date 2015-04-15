@@ -7,8 +7,8 @@ import com.grandcraftauto.game.player.GPlayer;
 public class EscapeCopsObjective extends Objective{
 
 	private int times;
-	public EscapeCopsObjective(String description, Dialogue dialogue, int times){
-		super(description, dialogue);
+	public EscapeCopsObjective(String description, Dialogue dialogue, boolean revert, int times){
+		super(description, dialogue, revert);
 		this.times = times;
 	}
 	

@@ -11,12 +11,13 @@ public class KillTargetObjective extends Objective {
 	private EntityType target;
 	private int amountToKill;
 	private String targetName;
-	
-	public KillTargetObjective(String desc, Dialogue dialogue, EntityType target, int amountToKill, String targetName){
-		super(desc, dialogue);
+	private boolean killUntilGone;
+	public KillTargetObjective(String desc, Dialogue dialogue, boolean revert, EntityType target, int amountToKill, String targetName, boolean killUntilGone){
+		super(desc, dialogue, revert);
 		this.target = target;
 		this.amountToKill = amountToKill;
 		this.targetName = targetName;
+		this.killUntilGone = killUntilGone;
 	}
 	
 	/**
@@ -41,6 +42,14 @@ public class KillTargetObjective extends Objective {
 	 */
 	public int getAmountToKill(){
 		return amountToKill;
+	}
+	
+	/**
+	 * Check if the targets should be killed until they're all gone
+	 * @return True if they should be killed until they're all gone, false if not
+	 */
+	public boolean shouldKillUntilGone(){
+		return killUntilGone;
 	}
 	
 	/**

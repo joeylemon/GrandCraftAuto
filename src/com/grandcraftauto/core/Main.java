@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -45,6 +47,7 @@ import com.grandcraftauto.game.jobs.FreeForAllCreator;
 import com.grandcraftauto.game.jobs.Job;
 import com.grandcraftauto.game.jobs.JobInstance;
 import com.grandcraftauto.game.jobs.JobJoiner;
+import com.grandcraftauto.game.jobs.JobState;
 import com.grandcraftauto.game.jobs.Race;
 import com.grandcraftauto.game.jobs.RaceCreator;
 import com.grandcraftauto.game.jobs.TeamDeathmatch;
@@ -57,6 +60,7 @@ import com.grandcraftauto.game.player.GPlayer;
 import com.grandcraftauto.game.player.PlayerStats;
 import com.grandcraftauto.game.weapons.Ammo;
 import com.grandcraftauto.game.weapons.Weapon;
+import com.grandcraftauto.tasks.DoorCloseTask;
 import com.grandcraftauto.tasks.FriendRequestTask;
 import com.grandcraftauto.tasks.InviteTask;
 import com.grandcraftauto.tasks.InvokedTask;
@@ -65,6 +69,7 @@ import com.grandcraftauto.tasks.LockpickTask;
 import com.grandcraftauto.tasks.ProstituteFollowTask;
 import com.grandcraftauto.tasks.ReloadTask;
 import com.grandcraftauto.tasks.RobTask;
+import com.grandcraftauto.tasks.ServerStopTask;
 import com.grandcraftauto.tasks.TeleportTask;
 import com.grandcraftauto.utils.EntityHider;
 import com.grandcraftauto.utils.EntityHider.Policy;
@@ -86,6 +91,7 @@ public class Main extends JavaPlugin{
 	
 	public int grenadeID = 0;
 	public int whitelist = -1;
+	public String nmsver = null;
 	
 	public List<String> zoomed = new ArrayList<String>();
 	public List<String> spawning = new ArrayList<String>();
@@ -95,9 +101,13 @@ public class Main extends JavaPlugin{
 	public List<String> harvesting = new ArrayList<String>();
 	public List<String> messageTask = new ArrayList<String>();
 	public List<JobInstance> jobs = new ArrayList<JobInstance>();
+	public List<String> harvestedKidney = new ArrayList<String>();
 	public List<String> killedProstitute = new ArrayList<String>();
+	public List<Location> placedBlocks = new ArrayList<Location>();
+	public List<Location> apartmentDoors = new ArrayList<Location>();
 	
 	public List<String> robCooldown = new ArrayList<String>();
+	public List<String> gpsCooldown = new ArrayList<String>();
 	public List<String> killCooldown = new ArrayList<String>();
 	public List<String> shootCooldown = new ArrayList<String>();
 	public List<String> reloadCooldown = new ArrayList<String>();
@@ -123,8 +133,10 @@ public class Main extends JavaPlugin{
 	public HashMap<String, KnockOutTask> knockingout = new HashMap<String, KnockOutTask>();
 	public HashMap<String, GarageInstance> inGarage = new HashMap<String, GarageInstance>();
 	public HashMap<String, LivingEntity> playerkiller = new HashMap<String, LivingEntity>();
+	public HashMap<Location, DoorCloseTask> doorclose = new HashMap<Location, DoorCloseTask>();
 	public HashMap<String, FriendRequestTask> friendRequest = new HashMap<String, FriendRequestTask>();
 	public HashMap<String, ProstituteFollowTask> prostitute = new HashMap<String, ProstituteFollowTask>();
+	public HashMap<String, List<Villager>> personalVillagers = new HashMap<String, List<Villager>>();
 	
 	/**
 	 * Get this class's instance
@@ -134,20 +146,13 @@ public class Main extends JavaPlugin{
 		return instance;
 	}
 	
-	/*
-	 * -=-(*)-=- TO DO -=-(*)-=-
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
-	
 	@SuppressWarnings("deprecation")
 	public void onEnable(){
 		instance = this;
 		entityHider = new EntityHider(this, Policy.BLACKLIST);
 		manager = Bukkit.getScoreboardManager();
+		nmsver = Bukkit.getServer().getClass().getPackage().getName();
+		nmsver = nmsver.substring(nmsver.lastIndexOf(".") + 1);
 		uCarsAPI.getAPI().hookPlugin(this);
 		uCarsAPI.getAPI().registerSpeedMod(this, new SpeedModifier());
 		Utils.initialize();
@@ -237,7 +242,7 @@ public class Main extends JavaPlugin{
 				for(Gang g : Gang.values()){
 					for(int x = 1; x <= g.getTotalHideoutLocations(); x++){
 						int toSpawn = g.getMaxAliveMembers() - g.getAliveMembers(x).size();
-						if(toSpawn <= g.getMaxAliveMembers()){
+						if(toSpawn <= g.getMaxAliveMembers() && toSpawn > 0){
 							for(int z = 1; z <= toSpawn; z++){
 								Villager v = Utils.spawnVillager(g.getVillagerType(), g.getHideoutLocation(x).add(Utils.randInt(-3, 3), 0, Utils.randInt(-3, 3)), g.getTag());
 								Utils.setMetadata(v, "hideout", x);
@@ -297,7 +302,7 @@ public class Main extends JavaPlugin{
 					}
 				}
 			}
-		}, 0, 800);
+		}, 0, 1200);
 	}
 	
 	public void onDisable(){
@@ -305,6 +310,11 @@ public class Main extends JavaPlugin{
 			if(Utils.isNPC(p) == false){
 				GPlayer gp = new GPlayer(p);
 				gp.logout();
+			}
+		}
+		for(Location l : placedBlocks){
+			if(l.getBlock() != null){
+				l.getBlock().setType(Material.AIR);
 			}
 		}
 	}
@@ -488,6 +498,7 @@ public class Main extends JavaPlugin{
 									if(Utils.isInteger(args[2]) == true){
 										int money = Integer.parseInt(args[2]);
 										gtarget.setWalletBalance(gtarget.getWalletBalance() + money);
+										gtarget.refreshScoreboard();
 										gplayer.sendMessage("You have given " + gold + args[1] + gray + " $" + money + "!");
 									}else{
 										gplayer.sendMessage("You have entered an invalid amount of money!");
@@ -621,6 +632,19 @@ public class Main extends JavaPlugin{
 						if(player.isOp() == true){
 							gplayer.refreshScoreboard();
 							gplayer.refreshNametag();
+							if(gplayer.hasMission() == true){
+								gplayer.setMission(0);
+								gplayer.setCurrentObjectiveID(0);
+							}
+							gplayer.sendActionBar(gold + "Hello");
+						}else{
+							gplayer.sendError("You may not perform this command!");
+						}
+					}else if(args[0].equalsIgnoreCase("reload")){
+						if(player.isOp() == true){
+							this.reloadConfig();
+							this.saveConfig();
+							gplayer.sendMessage("You have reloaded the configuration.");
 						}else{
 							gplayer.sendError("You may not perform this command!");
 						}
@@ -771,8 +795,19 @@ public class Main extends JavaPlugin{
 						}
 					}else if(args[0].equalsIgnoreCase("car")){
 						if(player.isOp() == true){
-							gplayer.setCurrentCar(Car.VAPID_BULLET);
-							player.getInventory().setItem(Slot.CAR.getSlot(), gplayer.getCurrentCar().getItemStack(false));
+							String name = args[1];
+							Car car = null;
+							for(Car c : Car.values()){
+								if(c.toString().equalsIgnoreCase(name)){
+									car = c;
+									break;
+								}
+							}
+							if(car != null){
+								gplayer.setCurrentCar(car);
+								player.getInventory().setItem(Slot.CAR.getSlot(), gplayer.getCurrentCar().getItemStack(false));
+								gplayer.sendMessage("You have set your current car to " + gold + car.getName() + gray + "!");
+							}
 						}else{
 							gplayer.sendError("You may not perform this command!");
 						}
@@ -795,7 +830,7 @@ public class Main extends JavaPlugin{
 					}else if(args[0].equalsIgnoreCase("killall")){
 						if(player.isOp() == true){
 							for(Entity e : Utils.getGCAWorld().getEntities()){
-								if(e instanceof LivingEntity){
+								if(e instanceof LivingEntity && !(e instanceof Player)){
 									e.remove();
 								}
 							}
@@ -850,6 +885,13 @@ public class Main extends JavaPlugin{
 						}else{
 							gplayer.sendError("You may not perform this command!");
 						}
+					}else if(args[0].equalsIgnoreCase("stop")){
+						if(player.isOp() == true){
+							ServerStopTask task = new ServerStopTask();
+							task.runTaskTimer(this, 0, 20);
+						}else{
+							gplayer.sendError("You may not perform this command!");
+						}
 					}
 				}
 			}else if(cmd.getName().equalsIgnoreCase("stats")){
@@ -882,23 +924,69 @@ public class Main extends JavaPlugin{
 					}
 				}
 			}else if(cmd.getName().equalsIgnoreCase("job") || cmd.getName().equalsIgnoreCase("j") || cmd.getName().equalsIgnoreCase("race")){
-				if(gplayer.hasJob() == true){
-					if(args.length > 0){
-						if(args[0].equalsIgnoreCase("quit")){
+				if(args.length > 0){
+					if(args[0].equalsIgnoreCase("quit")){
+						if(gplayer.hasJob() == true){
 							gplayer.getJobInstance().removePlayer(player);
 							gplayer.sendMessage("You have quit your current job!");
 						}else{
-							gplayer.sendCommandHelp(Help.JOB, 1);
+							gplayer.sendError("You don't have a job currently!");
+						}
+					}else if(args[0].equalsIgnoreCase("join")){
+						if(gplayer.hasJob() == false){
+							if(args.length > 1){
+								String name = "";
+								for(int i = 1; i <= (args.length - 1); i++){
+									if(name.length() == 0){
+										name = name + args[i];
+									}else{
+										name = name + " " + args[i];
+									}
+								}
+								Job job = null;
+								for(Job j : Job.list()){
+									if(j.getName().equalsIgnoreCase(name) == true){
+										job = j;
+										break;
+									}
+								}
+								if(job != null){
+									JobInstance jobinstance = null;
+									for(JobInstance j : this.jobs){
+										if(j.getJob().getName().equalsIgnoreCase(job.getName()) && j.getPlayers().size() < j.getJob().getMaximumPlayers() && j.getState() == JobState.WAITING){
+											jobinstance = j;
+											break;
+										}
+									}
+									if(jobinstance == null){
+										jobinstance = new JobInstance(job);
+										this.jobs.add(jobinstance);
+									}
+									jobinstance.addPlayer(player);
+									gplayer.sendMessage("You have joined " + gold + job.getName() + gray + "! (Quit with " + gold + "/job quit" + gray + ")");
+								}else{
+									gplayer.sendError("There is no job by that name!");
+								}
+							}else{
+								gplayer.sendError("Usage: /" + cmd.getName() + " join <job name>");
+							}
+						}else{
+							gplayer.sendError("You are already in a job!");
+						}
+					}else if(args[0].equalsIgnoreCase("list")){
+						gplayer.sendMessageHeader("Job List");
+						for(JobJoiner j : JobJoiner.getJobJoiners()){
+							gplayer.sendMessage(gold + j.getJob().getName() + gray + " (" + j.getJob().getType() + ")");
 						}
 					}else{
 						gplayer.sendCommandHelp(Help.JOB, 1);
 					}
 				}else{
-					gplayer.sendError("You don't have a job currently!");
+					gplayer.sendCommandHelp(Help.JOB, 1);
 				}
 			}else if(cmd.getName().equalsIgnoreCase("wallet") || cmd.getName().equalsIgnoreCase("balance") || cmd.getName().equalsIgnoreCase("bal")){
 				gplayer.sendMessage("Wallet Balance: " + gold + "$" + (int)gplayer.getWalletBalance());
-			}else if(cmd.getName().equalsIgnoreCase("apartment") || cmd.getName().equalsIgnoreCase("a")){
+			}else if(cmd.getName().equalsIgnoreCase("apartment") || cmd.getName().equalsIgnoreCase("a") || cmd.getName().equalsIgnoreCase("apt")){
 				if(args.length != 0){
 					if(args[0].equalsIgnoreCase("set")){
 						if(args.length == 2){
@@ -1041,6 +1129,7 @@ public class Main extends JavaPlugin{
 													crew.setSecondaryColor(Utils.randInt(1, 15));
 													crew.giveCrewArmor(player);
 													gplayer.setWalletBalance(gplayer.getWalletBalance() - cost);
+													gplayer.getStats().insert();
 													gplayer.sendMessage("You have created a new crew named " + gold + name + gray + "!");
 												}else{
 													gplayer.sendError("There is already a crew by that name!");
@@ -1485,12 +1574,16 @@ public class Main extends JavaPlugin{
 						if(args.length == 2){
 							if(gplayer.getFriends().contains(args[1])){
 								if(Utils.isOnline(args[1]) == true){
-									GPlayer toTeleportTo = new GPlayer(Bukkit.getPlayer(args[1]));
-									toTeleportTo.sendNotification("Friends", gold + player.getName() + gray + " is teleporting to you!");
-									gplayer.sendNotification("Friends", "You are teleporting to " + gold + toTeleportTo.getName() + gray + "! Don't move.");
-									TeleportTask task = new TeleportTask(player, Bukkit.getPlayer(args[1]));
-									task.runTaskTimer(this, 0, 20);
-									teleporting.put(player.getName(), task);
+									GPlayer target = new GPlayer(Bukkit.getPlayer(args[1]));
+									if(target.hasJob() == false){
+										target.sendNotification("Friends", gold + player.getName() + gray + " is teleporting to you!");
+										gplayer.sendNotification("Friends", "You are teleporting to " + gold + target.getName() + gray + "! Don't move.");
+										TeleportTask task = new TeleportTask(player, Bukkit.getPlayer(args[1]));
+										task.runTaskTimer(this, 0, 20);
+										teleporting.put(player.getName(), task);
+									}else{
+										gplayer.sendMessage(gold + target.getName() + gray + " is currently in a job!");
+									}
 								}else{
 									gplayer.sendError("That friend is not online!");
 								}

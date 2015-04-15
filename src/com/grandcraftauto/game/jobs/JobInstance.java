@@ -66,6 +66,13 @@ public class JobInstance {
 			if(main.jobs.contains(this)){
 				main.jobs.remove(this);
 			}
+		}else if(players.size() == 1){
+			if(main.jobs.contains(this)){
+				main.jobs.remove(this);
+			}
+			for(Player p : this.getPlayers()){
+				this.removePlayer(p);
+			}
 		}
 		GPlayer gplayer = new GPlayer(player);
 		gplayer.quitJobInstance();
@@ -374,9 +381,9 @@ public class JobInstance {
 			FreeForAll ffa = (FreeForAll) job;
 			int playersSize = this.getPlayers().size();
 			int winnerRPReward = (int)((playersSize * 3.5) + (ffa.getKillsRequired() * 0.8));
-			int winnerCashReward = (int)((playersSize * 5) + (ffa.getKillsRequired() * 0.8));
+			int winnerCashReward = (int)((playersSize * 10) + (ffa.getKillsRequired() * 6));
 			int loserRPReward = (int)((playersSize * 1) + (ffa.getKillsRequired() * 0.5));
-			int loserCashReward = (int)((playersSize * 2) + (ffa.getKillsRequired() * 0.5));
+			int loserCashReward = (int)((playersSize * 4) + (ffa.getKillsRequired() * 2));
 			for(Player p : this.getPlayers()){
 				GPlayer gp = new GPlayer(p);
 				gp.sendNotification("Free for All", gold + winner + gray + " has won the match!");
@@ -403,9 +410,9 @@ public class JobInstance {
 			}
 			int playersSize = this.getPlayers().size();
 			int winnerRPReward = (int)((playersSize * 3.5) + (tdm.getKillsRequired() * 0.8));
-			int winnerCashReward = (int)((playersSize * 5) + (tdm.getKillsRequired() * 0.8));
+			int winnerCashReward = (int)((playersSize * 10) + (tdm.getKillsRequired() * 6));
 			int loserRPReward = (int)((playersSize * 1) + (tdm.getKillsRequired() * 0.5));
-			int loserCashReward = (int)((playersSize * 2) + (tdm.getKillsRequired() * 0.5));
+			int loserCashReward = (int)((playersSize * 4) + (tdm.getKillsRequired() * 2));
 			for(Player p : this.getPlayers()){
 				GPlayer gp = new GPlayer(p);
 				gp.sendNotification("Team Deathmatch", gold + ChatColor.stripColor(winner) + " Team" + gray + " has won the match!");

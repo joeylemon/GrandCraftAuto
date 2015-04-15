@@ -146,15 +146,15 @@ public class Weapon implements Reward {
 	 */
 	public static final void initializeList(){
 		weapons.add(new MeleeWeapon("Knife", WeaponType.KNIFE, Arrays.asList(gray + italic + "Perfect for shanking."), 
-				25, 1, Material.ARROW, 1.1, null));
+				45, 1, Material.ARROW, 2.3, null));
 		weapons.add(new MeleeWeapon("Golf Club", WeaponType.GOLF_CLUB, Arrays.asList(gray + italic + "Fore!"), 
-				40, 2, Material.STICK, 1.3, null));
+				60, 2, Material.STICK, 2.5, null));
 		weapons.add(new MeleeWeapon("Nightstick", WeaponType.NIGHTSTICK, Arrays.asList(gray + italic + "Easily found off of a dead cop's body."), 
-				50, 4, Material.BLAZE_ROD, 1.38, null));
+				70, 4, Material.BLAZE_ROD, 2.6, null));
 		weapons.add(new MeleeWeapon("Baseball Bat", WeaponType.BASEBALL_BAT, Arrays.asList(gray + italic + "Used for more than just hitting baseballs."), 
-				65, 7, Material.STICK, 1.5, null));
+				85, 7, Material.STICK, 2.7, null));
 		weapons.add(new MeleeWeapon("Crowbar", WeaponType.CROWBAR, Arrays.asList(gray + italic + "High quality head smasher."), 
-				95, 12, Material.LEVER, 1.75, null));
+				115, 12, Material.LEVER, 3, null));
 		
 		weapons.add(new Gun("Pistol", WeaponType.PISTOL, Arrays.asList(gray + italic + "A well-rounded weapon for beginners."), 
 				350, 1, Material.WOOD_HOE, Ammo._45ACP, 5.2, 12, 1, 5, 10, 4, 2.5, null));

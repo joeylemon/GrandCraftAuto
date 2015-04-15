@@ -16,7 +16,7 @@ public final class WeaponUtils {
 		if(maxDamage <= 0){
 			double max = 0;
 			for(Weapon w : Weapon.list()){
-				if(w.getDamage() > max){
+				if(w.getDamage() > max && w.getType() != WeaponType.GRENADE){
 					max = w.getDamage();
 				}
 			}

@@ -1,6 +1,6 @@
 package com.grandcraftauto.utils;
 
-import net.minecraft.server.v1_8_R1.EnumParticle;
+import net.minecraft.server.v1_8_R2.EnumParticle;
 
 /**
  * A universal class used throughout my plugins for particle effects

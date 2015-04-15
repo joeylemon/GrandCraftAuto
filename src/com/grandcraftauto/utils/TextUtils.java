@@ -100,6 +100,14 @@ public class TextUtils {
 	}
 	
 	/**
+	 * Get the â–¬ UTF character
+	 * @return The â–¬ UTF character
+	 */
+	public static final String getDash(){
+		return "â–¬";
+	}
+	
+	/**
 	 * Get the symbol for a level
 	 * @param level - The level to get the symbol for
 	 * @return The symbol for the level
@@ -109,9 +117,9 @@ public class TextUtils {
 		if(level >= 10 && level < 20){
 			symbol = "âœ²";
 		}else if(level >= 20 && level < 30){
-			symbol = "â?‹";
+			symbol = "ï¿½?ï¿½";
 		}else if(level >= 30 && level < 40){
-			symbol = "â?‰";
+			symbol = "ï¿½?ï¿½";
 		}else if(level >= 40 && level < 50){
 			symbol = "âœº";
 		}else if(level >= 50 && level < 60){
@@ -121,7 +129,7 @@ public class TextUtils {
 		}else if(level >= 70 && level < 80){
 			symbol = "âœ¤";
 		}else if(level >= 80 && level < 90){
-			symbol = "â?ˆ";
+			symbol = "ï¿½?ï¿½";
 		}else if(level >= 90){
 			symbol = "âœ¢";
 		}

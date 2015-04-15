@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.bukkit.entity.Entity;
 
-import com.gmail.filoghost.holograms.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
 
 public class GarageInstance {
 	

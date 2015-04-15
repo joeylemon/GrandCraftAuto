@@ -8,8 +8,8 @@ public class StealVehicleObjective extends Objective{
 	
 	private Car car;
 	
-	public StealVehicleObjective(String desc, Dialogue dialogue, Car car){
-		super(desc, dialogue);
+	public StealVehicleObjective(String desc, Dialogue dialogue, boolean revert, Car car){
+		super(desc, dialogue, revert);
 		this.car = car;
 	}
 	

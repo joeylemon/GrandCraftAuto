@@ -7,7 +7,8 @@ public enum Destination {
 	BURGERSHOT("burgershot"),
 	BLACK_MARKET("black market"),
 	BANK("bank"),
-	APARTMENT_COMPLEX("manager");
+	APARTMENT_COMPLEX("manager"),
+	GAS_STATION("gas station");
 	
 	private String keyword;
 	Destination(String keyword){

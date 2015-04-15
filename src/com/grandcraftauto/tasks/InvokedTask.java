@@ -1,5 +1,8 @@
 package com.grandcraftauto.tasks;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -36,6 +39,7 @@ public class InvokedTask extends BukkitRunnable{
 	
 	private int seconds = 0;
 	private boolean prevLost = false;
+	private List<Integer> told = new ArrayList<Integer>();
 	
 	public void run(){
 		if(seconds < this.getTimerMax()){
@@ -56,9 +60,10 @@ public class InvokedTask extends BukkitRunnable{
 						prevLost = false;
 					}
 				}
+				gplayer.sendActionBar(gold + "Wanted Level: " + gray + this.getStars(this.getRealWantedLevel()));
 			}
 			seconds++;
-			for(Entity e : player.getNearbyEntities(16, 16, 16)){
+			for(Entity e : player.getNearbyEntities(14, 14, 14)){
 				if(e instanceof Villager){
 					Villager v = (Villager) e;
 					if(VillagerType.fromProfession(v.getProfession()) == type){
@@ -117,6 +122,7 @@ public class InvokedTask extends BukkitRunnable{
 		if(main.invoked.containsKey(player.getName())){
 			main.invoked.remove(player.getName());
 		}
+		gplayer.refreshScoreboard();
 	}
 	
 	/**
@@ -156,26 +162,67 @@ public class InvokedTask extends BukkitRunnable{
 	}
 	
 	/**
+	 * Get the player's real wanted level
+	 * @return The player's real wanted level
+	 */
+	public int getRealWantedLevel(){
+		int real = 0;
+		if(wantedLevel < 2){
+			real = 1;
+		}else if(wantedLevel >= 2 && wantedLevel < 3){
+			real = 2;
+		}else if(wantedLevel >= 3 && wantedLevel < 4){
+			real = 3;
+		}else if(wantedLevel >= 4 && wantedLevel < 5){
+			real = 4;
+		}else if(wantedLevel >= 5){
+			real = 5;
+		}
+		return real;
+	}
+	
+	/**
 	 * Set the player's wanted level
 	 * @param level - The value to set the player's wanted level as
 	 */
 	public void setWantedLevel(double level){
-		wantedLevel = Utils.round((float) level, 1);
-		if(wantedLevel == 1){
-			player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(1));
-			//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(1), 100F);
-		}else if(wantedLevel == 2){
-			player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(2));
-			//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(2), 100F);
-		}else if(wantedLevel == 3){
-			player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(3));
-			//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(3), 100F);
-		}else if(wantedLevel == 4){
-			player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(4));
-			//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(4), 100F);
-		}else if(wantedLevel == 5){
-			player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(5));
-			//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(5), 100F);
+		wantedLevel = level;
+		int realLevel = this.getRealWantedLevel();
+		if(realLevel == 1){
+			if(told.contains(realLevel) == false){
+				gplayer.refreshScoreboard();
+				told.add(realLevel);
+				player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel));
+				//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel), 100F);
+			}
+		}else if(realLevel == 2){
+			if(told.contains(realLevel) == false){
+				gplayer.refreshScoreboard();
+				told.add(realLevel);
+				player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel));
+				//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel), 100F);
+			}
+		}else if(realLevel == 3){
+			if(told.contains(realLevel) == false){
+				gplayer.refreshScoreboard();
+				told.add(realLevel);
+				player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel));
+				//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel), 100F);
+			}
+		}else if(realLevel == 4){
+			if(told.contains(realLevel) == false){
+				gplayer.refreshScoreboard();
+				told.add(realLevel);
+				player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel));
+				//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel), 100F);
+			}
+		}else if(realLevel == 5){
+			if(told.contains(realLevel) == false){
+				gplayer.refreshScoreboard();
+				told.add(realLevel);
+				player.sendMessage(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel));
+				//gplayer.sendBar(gold + ChatColor.ITALIC + "Wanted Level " + ChatColor.RESET + gold + TextUtils.getArrow() + gray + " " + this.getStars(realLevel), 100F);
+			}
 		}
 	}
 	
@@ -184,7 +231,18 @@ public class InvokedTask extends BukkitRunnable{
 	 * @return The amount of wanted level to add
 	 */
 	public double getWantedLevelToAdd(){
-		return 0.1;
+		double toAdd = 0;
+		int realLevel = this.getRealWantedLevel();
+		if(realLevel == 1){
+			toAdd = 0.1;
+		}else if(realLevel == 2){
+			toAdd = 0.075;
+		}else if(realLevel == 3){
+			toAdd = 0.025;
+		}else if(realLevel == 4){
+			toAdd = 0.005;
+		}
+		return toAdd;
 	}
 	
 	/**

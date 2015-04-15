@@ -38,7 +38,7 @@ public final class InventoryHandler {
 		}else if(slot == Slot.CAR.getSlot()){
 			mats.add(Material.MINECART);
 		}else if(slot == Slot.PHONE.getSlot()){
-			mats.add(Material.PAPER);
+			mats.add(Material.BOOK);
 		}else if(slot == Slot.GPS.getSlot()){
 			mats.add(Material.COMPASS);
 		}
@@ -61,6 +61,7 @@ public final class InventoryHandler {
 			misc.add(Material.TRIPWIRE_HOOK);
 			misc.add(Material.PAPER);
 			misc.add(Material.FERMENTED_SPIDER_EYE);
+			misc.add(Material.LEVER);
 		}
 		return misc;
 	}

@@ -54,10 +54,13 @@ public class Tutorial {
 			step++;
 			player.setAllowFlight(true);
 			player.setFlying(true);
+			for(Player p : Utils.getGCAWorld().getPlayers()){
+				p.hidePlayer(player);
+			}
 			player.teleport(getStepLocation(step));
 			gplayer.sendMessageHeader("Tutorial");
 			MessageTask task = new MessageTask(player, getStepDialogue(step));
-			task.runTaskTimer(main, 0, 150);
+			task.runTaskTimer(main, 0, 100);
 			if(main.messageTask.contains(player.getName())){
 				main.messageTask.remove(player.getName());
 			}
@@ -65,6 +68,9 @@ public class Tutorial {
 		}else{
 			if(main.tutorial.containsKey(player.getName())){
 				main.tutorial.remove(player.getName());
+			}
+			for(Player p : Utils.getGCAWorld().getPlayers()){
+				p.showPlayer(player);
 			}
 			gplayer.spawn();
 			player.sendMessage(ChatColor.GOLD + "* " + ChatColor.GRAY + "It is recommended you speak to Lamar for your first mission.");
@@ -79,7 +85,8 @@ public class Tutorial {
 					"You can complete missions, rob banks with your crew, compete in races against other players, and much more.",
 					"The first thing you are going to want to do when you enter the city is complete a mission.");
 		}else if(step == 2){
-			dialogue = Arrays.asList("Missions can be received from multiple NPCs throughout the city, such as Lamar or Michael.", 
+			dialogue = Arrays.asList("Missions can be received from multiple NPCs throughout the city, such as Lamar or Michael.",
+					"You may also use your phone to get a mission from an NPC remotely.",
 					"When you accept a mission, you are given a set of objectives in which you must follow to be rewarded with RP.");
 		}else if(step == 3){
 			dialogue = Arrays.asList("RP, or Reputation Points, is what you use to level up.", 
@@ -90,12 +97,10 @@ public class Tutorial {
 					"Money is earned through completing missions or jobs, leveling up, or mugging citizens off of the streets.");
 		}else if(step == 5){
 			dialogue = Arrays.asList("Weapons and cars carry unique attributes that enhance their abilities.",
-					"From long range to inaccuracy, each weapon has its pros and cons.",
 					"Cars also have speed and armor which give you a reason to buy a new car when you unlock one.",
 					"Both weapons and cars are unlocked at certain levels, and are a one-time purchase.");
 		}else if(step == 6){
 			dialogue = Arrays.asList("In Grand Craft Auto, you never drop your items when you die.",
-					"Therefore, buying new items proves to be a more rewarding experience in the end.",
 					"You must be informed, however, that you do drop all the money in your wallet upon death.",
 					"This is why you must deposit all your money into the bank every oppurtunity you get.");
 		}else if(step == 7){
@@ -105,7 +110,7 @@ public class Tutorial {
 					"However, killing players with a mental state higher than yours will reward you with RP.");
 		}else if(step == 8){
 			dialogue = Arrays.asList("Well %n, I hope you now know the fundamentals of what this city is about.",
-					"While your are slightly prepared, you still have much to learn out on the streets.",
+					"While you are slightly prepared, you still have much to learn out on the streets.",
 					"Go on. It is now your turn to become immersed in the rich city of Los Craftos.");
 		}
 		return dialogue;

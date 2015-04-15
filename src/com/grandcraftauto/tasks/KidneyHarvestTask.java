@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.game.inventories.InventoryHandler;
+import com.grandcraftauto.game.missions.objectives.StealKidneyObjective;
 import com.grandcraftauto.game.player.GPlayer;
 import com.grandcraftauto.utils.Utils;
 
@@ -40,6 +41,21 @@ public class KidneyHarvestTask extends BukkitRunnable {
 						gplayer.addMentalState(20);
 						if(main.harvesting.contains(target.getName())){
 							main.harvesting.remove(target.getName());
+						}
+						main.harvestedKidney.add(player.getName());
+						main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
+							public void run(){
+								main.harvestedKidney.remove(player.getName());
+							}
+						}, 8000);
+						if(gplayer.hasMission() == true){
+							if(gplayer.getObjective() instanceof StealKidneyObjective){
+								StealKidneyObjective obj = (StealKidneyObjective) gplayer.getObjective();
+								obj.setAmountStolen(player.getName(), obj.getAmountStolen(player.getName()) + 1);
+								if(obj.getAmountStolen(player.getName()) >= obj.getAmountToSteal()){
+									gplayer.advanceObjective();
+								}
+							}
 						}
 						this.cancel();
 					}

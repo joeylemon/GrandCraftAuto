@@ -22,7 +22,7 @@ public class FreeForAll extends Job {
 		return "Free for All";
 	}
 	
-	public boolean hasTeams() {
+	public boolean hasTeams(){
 		return false;
 	}
 	

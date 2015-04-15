@@ -34,7 +34,11 @@ public class SpeedModifier implements CarSpeedModifier{
 				if(Utils.isRoadBlock(player.getWorld().getBlockAt(player.getLocation())) == true){
 					Vector speed = travelVector;
 					if(main.currentcar.containsKey(player.getName())){
-						speed = travelVector.multiply(main.currentcar.get(player.getName()).getSpeed());
+						Car gcar = main.currentcar.get(player.getName());
+						speed = travelVector.multiply(gcar.getSpeed());
+						//gplayer.sendActionBar(Utils.asSpeedBars(Utils.getPercent((travelVector.length() - gcar.getMinimumSpeed()), (gcar.getMaximumSpeed() - gcar.getMinimumSpeed()))));
+					}else{
+						//gplayer.sendActionBar(Utils.asSpeedBars(Utils.getPercent((travelVector.length() - 8.50004), (8.5723 - 8.50004))));
 					}
 					double driving = 1 + (gplayer.getSkillLevel(Skill.DRIVING) * .0015);
 					return speed.multiply(driving);

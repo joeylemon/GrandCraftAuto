@@ -6,8 +6,8 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.utils.Utils;
 
@@ -29,7 +29,9 @@ public class JobJoiner {
 		if(hologram != null){
 			hologram.delete();
 		}
-		hologram = HolographicDisplaysAPI.createHologram(main, this.getLocation().add(0, 1.5, 0), ChatColor.DARK_BLUE + job.getName(), ChatColor.GRAY + job.getType());
+		hologram = HologramsAPI.createHologram(main, this.getLocation().add(0, 1.5, 0));
+		hologram.appendTextLine(ChatColor.DARK_BLUE + job.getName());
+		hologram.appendTextLine(ChatColor.GRAY + job.getType());
 	}
 	
 	public Job getJob(){

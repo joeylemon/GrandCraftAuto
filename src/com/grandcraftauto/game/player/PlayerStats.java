@@ -32,7 +32,7 @@ public class PlayerStats {
 	public int thugpoints = -1;
 	public Car currentcar = null;
 	public int crew = -1;
-	public String crewrank = "unset";
+	public String crewrank = null;
 	public List<String> friends = null;
 	public HashMap<Skill, Integer> skillLevels = new HashMap<Skill, Integer>();
 	

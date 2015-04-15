@@ -1,13 +1,12 @@
 package com.grandcraftauto.game;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,6 +15,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
@@ -31,6 +31,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,27 +51,24 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.gmail.filoghost.holograms.object.HologramBase;
-import com.gmail.filoghost.holograms.utils.VisibilityManager;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.game.apartment.Apartment;
 import com.grandcraftauto.game.apartment.ApartmentCreator;
 import com.grandcraftauto.game.cars.Car;
 import com.grandcraftauto.game.crew.Crew;
-import com.grandcraftauto.game.crew.CrewMember;
 import com.grandcraftauto.game.districts.DistrictCreator;
 import com.grandcraftauto.game.garage.Garage;
 import com.grandcraftauto.game.garage.GarageCreator;
@@ -100,9 +98,11 @@ import com.grandcraftauto.game.missions.MissionType;
 import com.grandcraftauto.game.missions.SideMission;
 import com.grandcraftauto.game.missions.SideMissionType;
 import com.grandcraftauto.game.missions.objectives.ApproachObjective;
+import com.grandcraftauto.game.missions.objectives.BuyProstituteObjective;
 import com.grandcraftauto.game.missions.objectives.HoldUpObjective;
 import com.grandcraftauto.game.missions.objectives.KillTargetObjective;
 import com.grandcraftauto.game.missions.objectives.ObtainItemsObjective;
+import com.grandcraftauto.game.missions.objectives.PlaceBlockObjective;
 import com.grandcraftauto.game.missions.objectives.ReachDestinationObjective;
 import com.grandcraftauto.game.missions.objectives.ReturnVehicleObjective;
 import com.grandcraftauto.game.missions.objectives.RobStationObjective;
@@ -111,7 +111,10 @@ import com.grandcraftauto.game.player.GPlayer;
 import com.grandcraftauto.game.weapons.Grenade;
 import com.grandcraftauto.game.weapons.Gun;
 import com.grandcraftauto.game.weapons.MeleeWeapon;
+import com.grandcraftauto.game.weapons.Shotgun;
 import com.grandcraftauto.game.weapons.Weapon;
+import com.grandcraftauto.tasks.DoorCloseTask;
+import com.grandcraftauto.tasks.InvokedTask;
 import com.grandcraftauto.tasks.KidneyHarvestTask;
 import com.grandcraftauto.tasks.KnockOutTask;
 import com.grandcraftauto.tasks.LockpickTask;
@@ -124,6 +127,7 @@ import com.grandcraftauto.utils.ObjectType;
 import com.grandcraftauto.utils.TextUtils;
 import com.grandcraftauto.utils.Utils;
 
+@SuppressWarnings("deprecation")
 public class Events implements Listener{
 	
 	Main main = Main.getInstance();
@@ -134,7 +138,7 @@ public class Events implements Listener{
 	public void asyncPlayerPreLogin(AsyncPlayerPreLoginEvent event){
 		if(Utils.isServerWhitelisted() == true){
 			if(Utils.isPlayerWhitelisted(event.getName()) == false){
-				String kickmsg = ChatColor.DARK_RED + "Unfortunately, you didn't sign up for the Grand Craft Auto beta testing :(" + "\n" + "However, it is possible to make a last-minute signup at our forums!";
+				String kickmsg = gold + "You did not sign up to participate in the beta testing." + "\n" + gray + "If this is a mistake, create a reply on the forums.";
 				event.disallow(Result.KICK_WHITELIST, kickmsg);
 				event.setKickMessage(kickmsg);
 			}
@@ -152,8 +156,9 @@ public class Events implements Listener{
 		gplayer.sendTabTitle(gray + "Welcome to " + gold + "Grand Craft Auto" + gray + "!", ChatColor.DARK_RED + "" + ChatColor.ITALIC + "The" + ChatColor.GOLD + ChatColor.ITALIC + "Legend" + 
 		ChatColor.YELLOW + ChatColor.ITALIC + "Craft");
 		
+		player.setFoodLevel(19);
 		player.getInventory().setItem(Slot.GPS.getSlot(), GPS.getCompass());
-		player.getInventory().setItem(Slot.PHONE.getSlot(), Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.YELLOW + "iFruit Cell Phone"));
+		player.getInventory().setItem(Slot.PHONE.getSlot(), Utils.renameItem(new ItemStack(Material.BOOK), ChatColor.YELLOW + "iFruit Cell Phone"));
 		if(gplayer.hasACar() == true && gplayer.getCurrentCar() != null){
 			player.getInventory().setItem(Slot.CAR.getSlot(), gplayer.getCurrentCar().getItemStack());
 		}
@@ -166,6 +171,10 @@ public class Events implements Listener{
 		gplayer.setName(player.getName());
 		if(gplayer.getRank() == null){
 			gplayer.setRank(Rank.DEFAULT);
+		}
+		
+		if(player.isOp() == false){
+			player.setGameMode(GameMode.ADVENTURE);
 		}
 		
 		if(main.playtime.containsKey(player.getName())){
@@ -202,6 +211,12 @@ public class Events implements Listener{
 				}
 			}, 20);
 		}
+	}
+	
+	@EventHandler
+	public void serverListPing(ServerListPingEvent event){
+		event.setMotd(gold + "Grand Craft Auto" + ChatColor.WHITE + " | " + gray + "Beta Testing Server                   "
+				+ "Version: " + gold + "v" + main.getDescription().getVersion());
 	}
 	
 	@EventHandler
@@ -269,6 +284,7 @@ public class Events implements Listener{
 					}else if(gplayer.getRank() == Rank.GODFATHER){
 						format = gold + "[" + gold + "G" + gold + "] " + format;
 					}
+					format.replaceAll("%", " percent");
 					event.setFormat(format);
 				}else{
 					event.setCancelled(true);
@@ -397,8 +413,39 @@ public class Events implements Listener{
 	
 	@EventHandler
 	public void blockBreak(BlockPlaceEvent event){
-		if(event.getPlayer().isOp() == false){
-			event.setCancelled(true);
+		Player player = event.getPlayer();
+		GPlayer gplayer = new GPlayer(player);
+		if(gplayer.hasMission() == true && gplayer.getObjective() instanceof PlaceBlockObjective){
+			final Block block = event.getBlock();
+			final PlaceBlockObjective obj = (PlaceBlockObjective) gplayer.getObjective();
+			if(block.getType() == obj.getBlock() && block.getLocation().distance(obj.getLocation()) <= 10){
+				gplayer.setHasInvoked(VillagerType.GANG_MEMBER, 0, "Guard");
+				gplayer.killPersonalVillagers();
+				List<Villager> personal = new ArrayList<Villager>();
+				for(int x = 1; x <= obj.getAmountToSpawn(); x++){
+					personal.add(Utils.spawnVillager(obj.getToSpawn(), obj.getLocation().add(Utils.randInt(-2, 2), 0, Utils.randInt(-2, 2)), ChatColor.GOLD + "Guard"));
+				}
+				main.personalVillagers.put(player.getName(), personal);
+				gplayer.advanceObjective();
+				main.placedBlocks.add(block.getLocation());
+				main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
+					public void run(){
+						main.placedBlocks.remove(block.getLocation());
+						block.setType(Material.AIR);
+						if(obj.shouldExplode() == true){
+							for(int x = 1; x <= 15; x++){
+								EffectUtils.playExplodeEffect(block.getLocation().add(Utils.randInt(-7, 7), 0, Utils.randInt(-7, 7)));
+							}
+						}
+					}
+				}, 1200);
+			}else{
+				event.setCancelled(true);
+			}
+		}else{
+			if(event.getPlayer().isOp() == false){
+				event.setCancelled(true);
+			}
 		}
 	}
 	
@@ -412,7 +459,6 @@ public class Events implements Listener{
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void projectileHit(ProjectileHitEvent event){
 	    BlockIterator iterator = new BlockIterator(event.getEntity().getWorld(), event.getEntity().getLocation().toVector(), event.getEntity().getVelocity().normalize(), 0, 4);
@@ -441,7 +487,63 @@ public class Events implements Listener{
 		GPlayer gplayer = new GPlayer(player);
 		if(event.getItem().hasItemMeta() == true && event.getItem().getItemMeta().hasDisplayName() == true){
 			String name = ChatColor.stripColor(event.getItem().getItemMeta().getDisplayName());
-			if(name.contains("Beer")){
+			if(name.contains("Burger")){
+				event.setCancelled(true);
+				if(player.getItemInHand().getAmount() > 1){
+					player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+				}else{
+					player.setItemInHand(null);
+				}
+				double newhealth = player.getHealth() + 4;
+				if(newhealth <= 20){
+					player.setHealth(newhealth);
+				}else{
+					player.setHealth(20);
+				}
+				player.setFoodLevel(19);
+			}else if(name.contains("Cookie")){
+				event.setCancelled(true);
+				if(player.getItemInHand().getAmount() > 1){
+					player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+				}else{
+					player.setItemInHand(null);
+				}
+				double newhealth = player.getHealth() + 1;
+				if(newhealth <= 20){
+					player.setHealth(newhealth);
+				}else{
+					player.setHealth(20);
+				}
+				player.setFoodLevel(19);
+			}else if(name.contains("Hot Dog")){
+				event.setCancelled(true);
+				if(player.getItemInHand().getAmount() > 1){
+					player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+				}else{
+					player.setItemInHand(null);
+				}
+				double newhealth = player.getHealth() + 2;
+				if(newhealth <= 20){
+					player.setHealth(newhealth);
+				}else{
+					player.setHealth(20);
+				}
+				player.setFoodLevel(19);
+			}else if(name.contains("Pizza")){
+				event.setCancelled(true);
+				if(player.getItemInHand().getAmount() > 1){
+					player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+				}else{
+					player.setItemInHand(null);
+				}
+				double newhealth = player.getHealth() + 5;
+				if(newhealth <= 20){
+					player.setHealth(newhealth);
+				}else{
+					player.setHealth(20);
+				}
+				player.setFoodLevel(19);
+			}else if(name.contains("Beer")){
 				event.setCancelled(true);
 				player.setItemInHand(null);
 				double newhealth = player.getHealth() + 1.5;
@@ -549,7 +651,6 @@ public class Events implements Listener{
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerInteract(PlayerInteractEvent event){
 		final Player player = event.getPlayer();
@@ -562,7 +663,7 @@ public class Events implements Listener{
 					 * Shoot weapon
 					 */
 					if(gplayer.hasWeaponInHand() == true){
-						if(gplayer.getWeaponInHand() instanceof Gun || gplayer.getWeaponInHand() instanceof Grenade){
+						if(gplayer.getWeaponInHand() instanceof Gun || gplayer.getWeaponInHand() instanceof Shotgun || gplayer.getWeaponInHand() instanceof Grenade){
 							event.setCancelled(true);
 							gplayer.shootGun();
 						}
@@ -590,7 +691,7 @@ public class Events implements Listener{
 						gplayer.addMentalState(0.5);
 						if(gplayer.hasCopsNearby() == true){
 							if(!main.invoked.containsKey(player.getName())){
-								gplayer.setHasInvoked(VillagerType.COP, null);
+								gplayer.setHasInvoked(VillagerType.COP, 1, null);
 							}
 						}
 						double consume = 0;
@@ -619,7 +720,7 @@ public class Events implements Listener{
 					}else if(item.getType() == Material.COMPASS){
 						event.setCancelled(true);
 						player.openInventory(GPS.getInventory(player));
-					}else if(item.getType() == Material.PAPER){
+					}else if(item.getType() == Material.BOOK){
 						if(item.hasItemMeta() == true && item.getItemMeta().hasDisplayName() == true){
 							if(item.getItemMeta().getDisplayName().contains("Phone")){
 								event.setCancelled(true);
@@ -668,8 +769,9 @@ public class Events implements Listener{
 			}
 			if(event.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
 				if(event.getClickedBlock() != null){
-					if(event.getClickedBlock().getType() == Material.WALL_SIGN){
-						Sign sign = (Sign) event.getClickedBlock().getState();
+					final Block block = event.getClickedBlock();
+					if(block.getType() == Material.WALL_SIGN){
+						Sign sign = (Sign) block.getState();
 						if(sign.getLine(0).contains("Apartment")){
 							/*
 							 * Purchase apartment
@@ -706,105 +808,54 @@ public class Events implements Listener{
 							}
 						}
 					}else{
-						if(event.getClickedBlock().getType() == Material.CHEST){
-							if(event.getClickedBlock().getType() == Material.CHEST){
-								Chest chest = (Chest) event.getClickedBlock().getState();
-								if(gplayer.hasApartment() == true){
-									boolean allow = false;
-									boolean breakInitial = false;
-									for(Apartment a : gplayer.getApartments()){
-										if(breakInitial == false){
-											for(Location l : a.getChestLocations()){
-												if(l.getBlock().getLocation().getX() == event.getClickedBlock().getLocation().getX() 
-														&& l.getBlock().getLocation().getY() == event.getClickedBlock().getLocation().getY()
-														&& l.getBlock().getLocation().getZ() == event.getClickedBlock().getLocation().getZ()){
-													allow = true;
-													breakInitial = true;
-													break;
-												}
-											}	
-										}else{
-											break;
-										}
-									}
-									if(allow == false){
-										event.setCancelled(true);
+						if(block.getType() == Material.CHEST){
+							Chest chest = (Chest) block.getState();
+							Location loc = block.getLocation();
+							if(gplayer.hasApartment() == true){
+								boolean allow = false;
+								boolean breakInitial = false;
+								for(Apartment a : gplayer.getApartments()){
+									if(breakInitial == false){
+										for(Location l : a.getChestLocations()){
+											if(l.getBlockX() == loc.getBlockX() 
+													&& l.getBlockY() == loc.getBlockY()
+													&& l.getBlockZ() == loc.getBlockZ()){
+												allow = true;
+												breakInitial = true;
+												break;
+											}
+										}	
 									}else{
-										event.setCancelled(true);
-										player.openInventory(gplayer.getChestInventory(chest));
+										break;
 									}
+								}
+								if(allow == false){
+									event.setCancelled(true);
 								}else{
 									event.setCancelled(true);
+									player.openInventory(gplayer.getChestInventory(chest));
 								}
 							}else{
 								event.setCancelled(true);
 							}
-						}else if(event.getClickedBlock().getType() == Material.WOODEN_DOOR){
+						}else if(block.getType() == Material.WOODEN_DOOR){
 							if(player.isOp() == false){
-								if(gplayer.hasApartment() == true || gplayer.crewHasApartment() == true){
-									boolean allow = false;
-									if(gplayer.hasApartment() == true){
-										boolean breakFirst = false;
-										for(Apartment a : gplayer.getApartments()){
-											if(breakFirst == false){
-												for(Location l : a.getDoorLocations()){
-													if(l.getBlock().getLocation().getX() == event.getClickedBlock().getLocation().getX() 
-															&& l.getBlock().getLocation().getY() == event.getClickedBlock().getLocation().getY()
-															&& l.getBlock().getLocation().getZ() == event.getClickedBlock().getLocation().getZ()){
-														allow = true;
-														breakFirst = true;
-														break;
-													}
-												}
-											}else{
-												break;
-											}
-										}
-									}else if(gplayer.crewHasApartment() == true){
-										boolean breakFirst = false;
-										boolean breakSecond = false;
-										for(Apartment a : gplayer.getCrewApartments()){
-											if(breakFirst == false){
-												for(Location l : a.getDoorLocations()){
-													if(breakSecond == false){
-														if(l.getBlock().getLocation().getX() == event.getClickedBlock().getLocation().getX() 
-																&& l.getBlock().getLocation().getY() == event.getClickedBlock().getLocation().getY()
-																&& l.getBlock().getLocation().getZ() == event.getClickedBlock().getLocation().getZ()){
-															for(CrewMember m : gplayer.getCrew().getMembers()){
-																if(m.getPlayer().hasApartment() == true){
-																	if(m.getPlayer().ownsApartment(a) == true){
-																		if(m.getPlayer().allowsApartmentForCrew() == true){
-																			allow = true;
-																			breakFirst = true;
-																			breakSecond = true;
-																			break;
-																		}else{
-																			allow = false;
-																			breakFirst = true;
-																			breakSecond = true;
-																			break;
-																		}
-																	}
-																}
-															}
-														}
-													}else{
-														break;
-													}
-												}
-											}else{
-												break;
-											}
-										}
-									}
-									if(allow == false){
+								if(Utils.isApartmentDoor(block.getLocation()) == true){
+									if(gplayer.canOpenDoor(block.getLocation()) == false){
 										event.setCancelled(true);
+									}else{
+										Block door = Utils.getBottomDoor(block);
+										if(main.doorclose.containsKey(door.getLocation()) == false){
+											DoorCloseTask task = new DoorCloseTask(door);
+											task.runTaskTimer(main, 0, 20);
+											main.doorclose.put(door.getLocation(), task);
+										}else{
+											main.doorclose.get(door.getLocation()).runtime = 0;
+										}
 									}
-								}else{
-									event.setCancelled(true);
 								}
 							}
-						}else if(event.getClickedBlock().getType() == Material.TRAP_DOOR){
+						}else if(Utils.canInteract(block.getType()) == false){
 							event.setCancelled(true);
 						}
 					}
@@ -980,7 +1031,6 @@ public class Events implements Listener{
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void playerMove(PlayerMoveEvent event){
 		Player player = event.getPlayer();
@@ -988,6 +1038,11 @@ public class Events implements Listener{
 		if(player.isOp() == false && gplayer.hasJob() == false && (event.getTo().getX() > Utils.getWorldBorder() || event.getTo().getX() < (Utils.getWorldBorder() * -1) || 
 				event.getTo().getZ() > Utils.getWorldBorder() || event.getTo().getZ() < (Utils.getWorldBorder() * -1))){
 			player.teleport(event.getFrom());
+			if(player.isInsideVehicle() == true){
+				player.getVehicle().setVelocity(player.getVelocity().multiply(-2).setY(0.2));
+			}else{
+				player.setVelocity(player.getVelocity().multiply(-2).setY(0.2));
+			}
 			gplayer.sendError("You have reached the city's border!");
 		}
 		if(main.spawning.contains(player.getName()) || main.tutorial.containsKey(player.getName()) || main.knockout.contains(player.getName())){
@@ -1003,7 +1058,14 @@ public class Events implements Listener{
 			if(gplayer.hasMission() == true){
 				if(gplayer.getObjective() instanceof ReachDestinationObjective){
 					ReachDestinationObjective obj = (ReachDestinationObjective) gplayer.getObjective();
-					if(player.getLocation().distance(obj.getDestination()) <= 20){
+					if(player.getLocation().distance(obj.getDestination()) <= 15){
+						if(gplayer.getMission() == Mission.VERDICT_GUILTY){
+							if(gplayer.getCurrentObjectiveID() <= 3){
+								gplayer.setHasInvoked(VillagerType.GANG_MEMBER, 0, "Bodyguard");
+							}else{
+								gplayer.setHasInvoked(VillagerType.GANG_MEMBER, 0, "Judge");
+							}
+						}
 						gplayer.advanceObjective();
 					}
 				}
@@ -1057,9 +1119,12 @@ public class Events implements Listener{
 								List<Hologram> holograms = new ArrayList<Hologram>();
 								for(Car c : gplayer.getCars()){
 									if(spawn < garage.getCarSpawns().size()){
-										Hologram hologram = HolographicDisplaysAPI.createHologram(main, garage.getCarSpawns().get(spawn).add(0.5, 2.5, 0.5), 
-												gold + c.getName(), 
-												arrow + "Speed: " + gray + c.getBarSpeed() + "    ");
+										Hologram hologram = HologramsAPI.createHologram(main, garage.getCarSpawns().get(spawn).add(0.5, 2.5, 0.5));
+										hologram.appendTextLine(gold + c.getName());
+										hologram.appendTextLine(arrow + "Speed: " + gray + c.getBarSpeed() + "    ");
+										hologram.getVisibilityManager().showTo(player);
+										hologram.getVisibilityManager().setVisibleByDefault(false);
+										
 										Minecart minecart = (Minecart) Utils.getGCAWorld().spawnEntity(garage.getCarSpawns().get(spawn).add(0.5, 1.5, 0.5), EntityType.MINECART);
 										Utils.setMetadata(minecart, "car", c.getName());
 										Utils.setMetadata(minecart, "isGarageCar", true);
@@ -1073,22 +1138,6 @@ public class Events implements Listener{
 										spawn++;
 									}else{
 										break;
-									}
-								}
-								for(Entity e : Utils.getGCAWorld().getEntities()){
-									if(e instanceof LivingEntity){
-										LivingEntity le = (LivingEntity) e;
-										if(HolographicDisplaysAPI.isHologramEntity(le) == true){
-											HologramBase h = HolographicDisplaysAPI.getNmsManager().getParentHologram(le);
-											for(Hologram holo : holograms){
-												if(h.getLocation().distance(holo.getLocation()) < 1){
-													Set<String> whoCanSee = new HashSet<String>();
-													whoCanSee.add(player.getName());
-													h.setVisibilityManager(new VisibilityManager(whoCanSee));
-													break;
-												}
-											}
-										}
 									}
 								}
 								main.inGarage.put(player.getName(), new GarageInstance(garage, cars, holograms));
@@ -1207,7 +1256,6 @@ public class Events implements Listener{
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void vehicleMove(VehicleMoveEvent event){
 		if(event.getFrom().getX() != event.getTo().getX() || event.getFrom().getZ() != event.getTo().getZ()){
@@ -1276,20 +1324,25 @@ public class Events implements Listener{
 	public void playerPickupItem(PlayerPickupItemEvent event){
 		Player player = event.getPlayer();
 		GPlayer gplayer = new GPlayer(player);
-		if(event.getItem().hasMetadata("value") == false){
-			if(InventoryHandler.addItemToAppropriateSlot(player, event.getItem().getItemStack()) == true){
+		Item item = event.getItem();
+		int money = -1;
+		if(item.getItemStack().hasItemMeta() == true && item.getItemStack().getItemMeta().hasDisplayName() == true && Utils.isInteger(item.getItemStack().getItemMeta().getDisplayName()) == true){
+			money = Integer.parseInt(item.getItemStack().getItemMeta().getDisplayName());
+		}
+		if(money == -1){
+			if(InventoryHandler.addItemToAppropriateSlot(player, item.getItemStack()) == true){
 				event.setCancelled(true);
-				event.getItem().remove();
+				item.remove();
 				if(gplayer.hasMission() == true){
 					if(gplayer.getObjective() instanceof ObtainItemsObjective){
 						ObtainItemsObjective obj = (ObtainItemsObjective) gplayer.getObjective();
-						if(event.getItem().getItemStack().getType() == obj.getItemType()){
+						if(item.getItemStack().getType() == obj.getItemType()){
 							if(!main.invoked.containsKey(player.getName())){
-								gplayer.setHasInvoked(obj.getToInvoke(), obj.getGangToInvoke());
+								gplayer.setHasInvoked(obj.getToInvoke(), 0, obj.getGangToInvoke());
 							}else{
 								main.invoked.get(player.getName()).setTimer(0);
 							}
-							obj.setAmountObtained(player.getName(), obj.getAmountObtained(player.getName()) + event.getItem().getItemStack().getAmount());
+							obj.setAmountObtained(player.getName(), obj.getAmountObtained(player.getName()) + item.getItemStack().getAmount());
 							if(obj.getAmountObtained(player.getName()) >= obj.getAmountToObtain()){
 								gplayer.advanceObjective();
 							}
@@ -1301,23 +1354,18 @@ public class Events implements Listener{
 			}
 		}else{
 			event.setCancelled(true);
-			int value = 0;
-			if(event.getItem().hasMetadata("value") == true){
-				value = (int) Utils.getMetadata(event.getItem(), "value", ObjectType.INT);
-			}
-			gplayer.setWalletBalance(gplayer.getWalletBalance() + value);
-			player.sendMessage(gray + "+ " + gold + "$" + value);
+			gplayer.setWalletBalance(gplayer.getWalletBalance() + money);
+			player.sendMessage(gray + "+ " + gold + "$" + money);
 			gplayer.refreshScoreboard();
-			event.getItem().remove();
+			item.remove();
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void inventoryClick(final InventoryClickEvent event){
 		if(event.getWhoClicked() instanceof Player){
 			final Player player = (Player) event.getWhoClicked();
-			GPlayer gplayer = new GPlayer(player);
+			final GPlayer gplayer = new GPlayer(player);
 			InventoryType type = event.getInventory().getType();
 			boolean armor = false;
 			/*
@@ -1330,11 +1378,13 @@ public class Events implements Listener{
 						armor = true;
 					}
 				}
-				if(event.getCurrentItem().hasItemMeta() == true && event.getCurrentItem().getItemMeta().hasDisplayName() == true){
-					String name = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName());
-					if(name.contains("Phone") || name.contains("GPS") || (gplayer.getCurrentCar() != null && name.contains(gplayer.getCurrentCar().getName()))){
-						event.setCancelled(true);
-						return;
+				if(player.isOp() == false){
+					if(event.getCurrentItem().hasItemMeta() == true && event.getCurrentItem().getItemMeta().hasDisplayName() == true){
+						String name = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName());
+						if(name.contains("Phone") || name.contains("GPS") || (gplayer.getCurrentCar() != null && name.contains(gplayer.getCurrentCar().getName()))){
+							event.setCancelled(true);
+							return;
+						}
 					}
 				}
 			}
@@ -1384,7 +1434,7 @@ public class Events implements Listener{
 												event.setCancelled(true);
 												List<Character> givers = new ArrayList<Character>();
 												List<Mission> availableMissions = new ArrayList<Mission>();
-												for(Mission m : Mission.values()){
+												for(Mission m : Mission.list()){
 													if(m.getType() == MissionType.REGULAR){
 														if(gplayer.hasCompletedMission(m.getID()) == false){
 															if(!givers.contains(m.getGiver())){
@@ -1415,7 +1465,7 @@ public class Events implements Listener{
 												event.setCancelled(true);
 												List<Character> givers = new ArrayList<Character>();
 												List<Mission> availableMissions = new ArrayList<Mission>();
-												for(Mission m : Mission.values()){
+												for(Mission m : Mission.list()){
 													if(m.getType() == MissionType.SIDE_MISSION){
 														if(SideMission.getSideMission(SideMissionType.DAILY).getID() == m.getID()){
 															if(gplayer.canCompleteSideMission(SideMissionType.DAILY) == true){
@@ -1496,10 +1546,17 @@ public class Events implements Listener{
 													}else if(name.contains("Apartments")){
 														player.openInventory(GPS.getApartmentInventory(player));
 													}else if(name.contains("Mission Objective")){
-														ReachDestinationObjective obj = (ReachDestinationObjective) gplayer.getObjective();
-														player.setCompassTarget(obj.getDestination());
-														gplayer.setDestination(name, obj.getDestination());
-														player.closeInventory();
+														if(gplayer.getObjective() instanceof ReachDestinationObjective){
+															ReachDestinationObjective obj = (ReachDestinationObjective) gplayer.getObjective();
+															player.setCompassTarget(obj.getDestination());
+															gplayer.setDestination(name, obj.getDestination());
+															player.closeInventory();
+														}else if(gplayer.getObjective() instanceof PlaceBlockObjective){
+															PlaceBlockObjective obj = (PlaceBlockObjective) gplayer.getObjective();
+															player.setCompassTarget(obj.getLocation());
+															gplayer.setDestination(name, obj.getLocation());
+															player.closeInventory();
+														}
 													}
 												}
 											}
@@ -1589,6 +1646,26 @@ public class Events implements Listener{
 												player.openInventory(Skill.getInventory(player));
 											}else if(name.contains("Bounty")){
 												player.openInventory(Bounties.getInventory(player));
+											}else if(name.contains("Contacts")){
+												player.openInventory(Utils.getContactsInventory());
+											}else if(name.contains("Cops")){
+												if(main.invoked.containsKey(player.getName()) == true){
+													InvokedTask task = main.invoked.get(player.getName());
+													if(task.getVillagerType() == VillagerType.COP){
+														if(gplayer.getWalletBalance() >= 175){
+															gplayer.setWalletBalance(gplayer.getWalletBalance() - 175);
+															task.clearTask(true);
+															task.cancel();
+														}else{
+															gplayer.sendError("You do not have enough money for this!");
+														}
+													}else{
+														gplayer.sendError("You are not wanted!");
+													}
+												}else{
+													gplayer.sendError("You are not wanted!");
+												}
+												player.closeInventory();
 											}
 										}
 									}
@@ -1658,6 +1735,41 @@ public class Events implements Listener{
 											}
 										}
 									}
+								}else if(event.getInventory().getTitle().contains("Contacts")){
+									event.setCancelled(true);
+									if(event.getCurrentItem() != null){
+										if(event.getCurrentItem().getType() == Material.SKULL_ITEM){
+											if(event.getCurrentItem().hasItemMeta() == true && event.getCurrentItem().getItemMeta().hasDisplayName() == true){
+												String name = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName());
+												Character character = null;
+												for(Character c : Character.values()){
+													if(c.getName().equalsIgnoreCase(name)){
+														character = c;
+														break;
+													}
+												}
+												if(character != null){
+													final String cname = character.getName();
+													gplayer.sendMessage("Calling " + character.getName() + "...");
+													player.closeInventory();
+													main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
+														public void run(){
+															if(gplayer.hasMission() == false){
+																gplayer.attemptToGiveMission(cname);
+															}else{
+																if(gplayer.getMission().getGiver().getName().equalsIgnoreCase(cname) == false){
+																	gplayer.sendMessage(gold + cname + ": " + gray + "It looks like " + gplayer.getMission().getGiver().getName() + 
+																			" already has you doing a mission.");
+																}else{
+																	gplayer.sendMessage(gold + cname + ": " + gray + "Hey, have you finished the mission yet?");
+																}
+															}
+														}
+													}, Utils.randInt(65, 100));
+												}
+											}
+										}
+									}
 								}else if(event.getInventory().getTitle().contains("How long")){
 									event.setCancelled(true);
 									if(event.getCurrentItem() != null){
@@ -1692,6 +1804,9 @@ public class Events implements Listener{
 														Utils.setMetadata(villager, "prostitute", true);
 														gplayer.sendMessage("You have purchased this prostitute for " + strTime);
 														gplayer.refreshScoreboard();
+														if(gplayer.hasMission() == true && gplayer.getObjective() instanceof BuyProstituteObjective){
+															gplayer.advanceObjective();
+														}
 													}
 												}else{
 													gplayer.sendError("You do not have enough money for this!");
@@ -1805,6 +1920,11 @@ public class Events implements Listener{
 	}
 	
 	@EventHandler
+	public void foodLevelChange(FoodLevelChangeEvent event){
+		event.setFoodLevel(19);
+	}
+	
+	@EventHandler
 	public void playerDropItem(PlayerDropItemEvent event){
 		Player player = event.getPlayer();
 		GPlayer gplayer = new GPlayer(player);
@@ -1817,11 +1937,23 @@ public class Events implements Listener{
 					gplayer.sendError("You may not drop this item during your current mission!");
 					return;
 				}
+			}else if(gplayer.getMission() == Mission.DRUG_BUSTERS){
+				if(event.getItemDrop().getItemStack().getType() == Material.SUGAR){
+					event.setCancelled(true);
+					gplayer.sendError("You may not drop this item during your current mission!");
+					return;
+				}
+			}else{
+				if(event.getItemDrop().getItemStack().getType() == Material.LEVER){
+					event.setCancelled(true);
+					gplayer.sendError("You may not drop this item during your current mission!");
+					return;
+				}
 			}
 		}
 		
 		if(event.getItemDrop().getItemStack().getType() == Material.MINECART || event.getItemDrop().getItemStack().getType() == Material.COMPASS || 
-				event.getItemDrop().getItemStack().getType() == Material.PAPER || main.cancelDrop.contains(player.getName())){
+				event.getItemDrop().getItemStack().getType() == Material.BOOK || main.cancelDrop.contains(player.getName())){
 			if(InventoryHandler.addItemToAppropriateSlot(player, event.getItemDrop().getItemStack()) == true){
 				event.getItemDrop().remove();
 			}
@@ -1919,6 +2051,18 @@ public class Events implements Listener{
 								allow = false;
 							}
 						}
+						if(Utils.isNPC(player) == true){
+							allow = false;
+						}
+						if(Utils.isSafezone(player.getLocation()) == true){
+							allow = false;
+							gdamager.sendError("That player is in a safezone!");
+						}
+						if(gdamager.isFriend(player.getName()) == true && gdamager.hasJob() == false && gplayer.hasJob() == false){
+							allow = false;
+							gdamager.sendError("That player is your friend!");
+						}
+						gplayer.repairArmor();
 					}else if(entity instanceof Villager){
 						Villager villager = (Villager) entity;
 						if(villager.getCustomName() != null && villager.getCustomName().contains("Drug")){
@@ -1933,6 +2077,7 @@ public class Events implements Listener{
 						}
 					}
 					if(allow == true){
+						event.setDamage(0);
 						EffectUtils.playBloodEffect(entity);
 						/*
 						 * Damager is a player
@@ -1942,10 +2087,12 @@ public class Events implements Listener{
 							 * Damager has weapon in hand
 							 */
 							Weapon weapon = gdamager.getWeaponInHand();
-							double damage = weapon.getDamage() + event.getDamage();
-							if(weapon instanceof Gun){
+							double damage = 2;
+							if(event.getDamager() instanceof Egg && weapon instanceof Gun){
+								damage = weapon.getDamage();
 								damage += (gdamager.getSkillLevel(Skill.SHOOTING) * .006);
-							}else if(weapon instanceof MeleeWeapon){
+							}else if(event.getDamager() instanceof Player && weapon instanceof MeleeWeapon){
+								damage = weapon.getDamage();
 								damage += (gdamager.getSkillLevel(Skill.STRENGTH) * .01);
 							}
 							double newHealth = entity.getHealth() - damage;
@@ -1978,7 +2125,7 @@ public class Events implements Listener{
 							/*
 							 * Damager has no weapon in hand
 							 */
-							double damage = 1 + event.getDamage();
+							double damage = 1;
 							double newHealth = entity.getHealth() - damage;
 							if(newHealth > 1){
 								entity.damage(damage);
@@ -2015,7 +2162,7 @@ public class Events implements Listener{
 									/*
 									 * Damaged entity is a player, warn cops if nearby
 									 */
-									gdamager.setHasInvoked(VillagerType.COP, null);
+									gdamager.setHasInvoked(VillagerType.COP, 1, null);
 								}
 							}
 						}
@@ -2038,18 +2185,24 @@ public class Events implements Listener{
 				Villager villager = (Villager) dmgr;
 				if(event.getEntity() instanceof Player){
 					Player player = (Player) event.getEntity();
-					GPlayer gplayer = new GPlayer(player);
-					double newHealth = player.getHealth() - 3;
-					if(newHealth > 1){
-						player.damage(3);
+					if(Utils.isNPC(player) == false){
+						GPlayer gplayer = new GPlayer(player);
+						double newHealth = player.getHealth() - 2;
+						if(newHealth > 1){
+							player.damage(2);
+						}else{
+							event.setCancelled(true);
+							if(main.playerkiller.containsKey(player.getName())){
+								main.playerkiller.remove(player.getName());
+							}
+							main.playerkiller.put(player.getName(), villager);
+							gplayer.death();
+						}
 					}else{
 						event.setCancelled(true);
-						if(main.playerkiller.containsKey(player.getName())){
-							main.playerkiller.remove(player.getName());
-						}
-						main.playerkiller.put(player.getName(), villager);
-						gplayer.death();
 					}
+				}else{
+					event.setCancelled(true);
 				}
 			}
 		}
@@ -2095,9 +2248,38 @@ public class Events implements Listener{
 								}
 							}
 							if(allow == true){
-								obj.setAmountKilled(killer.getName(), obj.getAmountKilled(killer.getName()) + 1);
-								if(obj.getAmountKilled(killer.getName()) >= obj.getAmountToKill()){
-									gkiller.advanceObjective();
+								if(obj.shouldKillUntilGone() == false){
+									obj.setAmountKilled(killer.getName(), obj.getAmountKilled(killer.getName()) + 1);
+									if(obj.getAmountKilled(killer.getName()) >= obj.getAmountToKill()){
+										gkiller.advanceObjective();
+										gkiller.killPersonalVillagers();
+									}
+								}else{
+									boolean nearby = false;
+									for(Entity e : entity.getNearbyEntities(15, 15, 15)){
+										if(e instanceof LivingEntity){
+											LivingEntity le = (LivingEntity) e;
+											if(e.getEntityId() != entity.getEntityId()){
+												if(e.getType() == entity.getType()){
+													if(obj.getTargetName() != null && le.getCustomName() != null){
+														if(ChatColor.stripColor(le.getCustomName()).equalsIgnoreCase(obj.getTargetName()) == true){
+															nearby = true;
+															gkiller.sendMessage(ChatColor.stripColor(le.getCustomName()) + " = " + obj.getTargetName());
+															killer.teleport(le.getLocation());
+															break;
+														}
+													}
+												}
+											}
+										}
+									}
+									if(nearby == false){
+										gkiller.advanceObjective();
+										gkiller.killPersonalVillagers();
+									}
+								}
+								if(gkiller.getMission() == Mission.DRUG_BUSTERS){
+									Utils.getGCAWorld().dropItem(entity.getLocation(), Utils.getCocaineItem(2));
 								}
 							}
 						}
@@ -2159,15 +2341,28 @@ public class Events implements Listener{
 								if(gplayer.getObjective() instanceof ApproachObjective){
 									ApproachObjective obj = (ApproachObjective) gplayer.getObjective();
 									if(obj.getToApproach().getName().equalsIgnoreCase(name)){
+										boolean hasItems = true;
 										if(obj.getItemToReturn() != null){
 											if(gplayer.getAmountOfMaterialInInventory(obj.getItemToReturn()) >= obj.getAmountOfItemToReturn()){
 												gplayer.removeMaterialFromInventory(obj.getItemToReturn(), obj.getAmountOfItemToReturn());
-												gplayer.sendDialogueMessage(mission.getObjectives().get(objID).getDialogue(), true);
 											}else{
-												gplayer.sendMessage(gold + name + ": " + gray + "Get what I asked you to get, then come back to me!");
+												hasItems = false;
 											}
-										}else{
+										}
+										if(obj.shouldReturnProstitute() == true){
+											if(main.prostitute.containsKey(player.getName())){
+												ProstituteFollowTask task = main.prostitute.get(player.getName());
+												main.prostitute.remove(player.getName());
+												Utils.setNavigation(npc.getLocation(), task.getVillager());
+												task.cancel();
+											}else{
+												hasItems = false;
+											}
+										}
+										if(hasItems == true){
 											gplayer.sendDialogueMessage(mission.getObjectives().get(objID).getDialogue(), true);
+										}else{
+											gplayer.sendMessage(gold + name + ": " + gray + "Get what I asked you to get, then come back to me!");
 										}
 									}
 								}else if(gplayer.getObjective() instanceof ReturnVehicleObjective){
@@ -2218,58 +2413,7 @@ public class Events implements Listener{
 							}
 						}
 					}else{
-						List<Character> givers = new ArrayList<Character>();
-						List<Mission> availableMissions = new ArrayList<Mission>();
-						for(Mission m : Mission.values()){
-							if(m.getGiver().getName().equalsIgnoreCase(name)){
-								if(m.getType() == MissionType.REGULAR){
-									if(gplayer.hasCompletedMission(m.getID()) == false){
-										if(!givers.contains(m.getGiver())){
-											if(gplayer.getLevel() >= m.getMinimumLevel()){
-												availableMissions.add(m);
-												givers.add(m.getGiver());
-											}
-										}
-									}
-								}else if(m.getType() == MissionType.SIDE_MISSION){
-									if(SideMission.getSideMission(SideMissionType.DAILY) != null && SideMission.getSideMission(SideMissionType.DAILY).getID() == m.getID()){
-										if(gplayer.canCompleteSideMission(SideMissionType.DAILY) == true){
-											if(gplayer.getLevel() >= m.getMinimumLevel()){
-												availableMissions.add(m);
-												givers.add(m.getGiver());
-											}
-										}
-									}
-								}
-							}
-						}
-						boolean isRegularMission = false;
-						boolean isSideMission = false;
-						Mission mission = null;
-						if(availableMissions.size() > 0){
-							for(Mission m : availableMissions){
-								if(m.getType() == MissionType.SIDE_MISSION){
-									isSideMission = true;
-								}else if(m.getType() == MissionType.REGULAR){
-									isRegularMission = true;
-								}
-								mission = m;
-							}
-						}
-						if(mission != null){
-							if(isRegularMission == true && isSideMission == true){
-								Inventory inv = Bukkit.createInventory(null, 9, gray + "Select Mission - " + name);
-								inv.setItem(3, Utils.renameItem(new ItemStack(Material.WOOL, 1, (short) 5), gold + "Regular Mission"));
-								inv.setItem(5, Utils.renameItem(new ItemStack(Material.WOOL, 1, (short) 1), gold + "Daily Mission"));
-								player.openInventory(inv);
-							}else{
-								gplayer.setMission(mission.getID());
-								gplayer.sendMessageHeader("New Mission");
-								gplayer.sendMissionOverview(false);
-							}
-						}else{
-							gplayer.sendMessage(gold + name + ": " + gray + "I don't have any missions for you right now, but try coming back when you're a higher level.");
-						}
+						gplayer.attemptToGiveMission(name);
 					}
 				}else if(isStoreVendor == true){
 					if(!name.contains("Gas Station")){
@@ -2304,9 +2448,7 @@ public class Events implements Listener{
 								task.runTaskTimer(main, 0, 20);
 								main.robbing.put(player.getName(), task);
 								gplayer.sendMessage(gold + name + ": " + gray + "I'll get the money! Hold on!");
-								if(Utils.randInt(1, 8) == 1){
-									gplayer.setHasInvoked(VillagerType.COP, null);
-								}
+								gplayer.setHasInvoked(VillagerType.COP, 2, null);
 							}else{
 								player.openInventory(store.getPage(1));
 							}
@@ -2344,17 +2486,22 @@ public class Events implements Listener{
 						}
 					}else if(item.getItemMeta().getDisplayName().contains("Knife")){
 						if(main.knockout.contains(target.getName())){
-							if(target.hasMetadata("kidneyStolen") == false){
-								if(main.harvesting.contains(target.getName()) == false){
-									KidneyHarvestTask task = new KidneyHarvestTask(player, target);
-									task.runTaskTimer(main, 0, 20);
-									main.harvesting.add(target.getName());
-									gplayer.sendMessage("You have begun cutting out " + gold + target.getName() + "'s " + gray + "kidney.");
+							if(main.harvestedKidney.contains(player.getName()) == false){
+								if(target.hasMetadata("kidneyStolen") == false){
+									if(main.harvesting.contains(target.getName()) == false){
+										KidneyHarvestTask task = new KidneyHarvestTask(player, target);
+										task.runTaskTimer(main, 0, 20);
+										main.harvesting.add(target.getName());
+										gplayer.sendMessage("You have begun cutting out " + gold + target.getName() + "'s " + gray + "kidney.");
+										gplayer.setHasInvoked(VillagerType.COP, 3, null);
+									}else{
+										gplayer.sendError("This player's kidney is currently being taken!");
+									}
 								}else{
-									gplayer.sendError("This player's kidney is currently being taken!");
+									gplayer.sendError("This player's kidney has already been stolen!");
 								}
 							}else{
-								gplayer.sendError("This player's kidney has already been stolen!");
+								gplayer.sendError("You should wait before stealing another kidney!");
 							}
 						}
 					}
@@ -2395,7 +2542,7 @@ public class Events implements Listener{
 			Villager villager = (Villager) event.getRightClicked();
 			event.setCancelled(true);
 			if(gplayer.hasWeaponInHand() == true){
-				if(villager.getCustomName() != null){
+				if(villager.getCustomName() != null && villager.getCustomName().contains("Cop") == false){
 					if(villager.getCustomName().contains("Drug")){
 						if(gplayer.hasWeaponInHand() == true && gplayer.hasMission() == true && gplayer.getObjective() instanceof HoldUpObjective){
 							if(!main.robbing.containsKey(player.getName())){

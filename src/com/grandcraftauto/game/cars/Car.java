@@ -133,6 +133,22 @@ public enum Car implements Reward {
 	}
 	
 	/**
+	 * Get the car's minimum speed
+	 * @return The car's minimum speed
+	 */
+	public double getMinimumSpeed(){
+		return (this.getSpeed() / 0.117646);
+	}
+	
+	/**
+	 * Get the car's maximum speed
+	 * @return The car's maximum speed
+	 */
+	public double getMaximumSpeed(){
+		return (this.getSpeed() / 0.116655);
+	}
+	
+	/**
 	 * Get the itemstack of the car
 	 * @return The itemstack of the car
 	 */

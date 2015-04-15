@@ -18,6 +18,10 @@ public enum Gang {
 	HOODLUM("Hoodlum", VillagerType.GANG_MEMBER, ChatColor.GOLD + "Hoodlum", 9),
 	KIDNAPPER("Kidnapper", VillagerType.GANG_MEMBER, ChatColor.RED + "Kidnapper", 1),
 	DRUGDEALER("DrugDealer", VillagerType.GANG_MEMBER, ChatColor.RED + "Drug Dealer", 1),
+	SNITCH("Snitch", VillagerType.GANG_MEMBER, ChatColor.RED + "Snitch", 1),
+	THUG("Thug", VillagerType.GANG_MEMBER, ChatColor.RED + "Thug", 3),
+	JUDGE("Judge", VillagerType.GANG_MEMBER, ChatColor.RED + "Judge", 1),
+	BODYGUARD("Bodyguard", VillagerType.GANG_MEMBER, ChatColor.RED + "Bodyguard", 6),
 	PROSTITUTE("Prostitute", VillagerType.PROSTITUTE, ChatColor.LIGHT_PURPLE + "Prostitute", 4);
 	
 	Main main = Main.getInstance();
@@ -126,7 +130,7 @@ public enum Gang {
 				for(int i : members){
 					if(entity.getEntityId() == i){
 						if(entity.hasMetadata("hideout") == true && (int)Utils.getMetadata(entity, "hideout", ObjectType.INT) == hideout){
-							if(entity.isDead() == false && entity.isValid() == true && entity.getLocation().distance(this.getHideoutLocation(hideout)) < 15){
+							if(entity.isDead() == false && entity.isValid() == true && entity.getLocation().distance(this.getHideoutLocation(hideout)) < 13){
 								alive.add(entity);
 							}else{
 								if(this.getVillagerType() == VillagerType.PROSTITUTE){

@@ -12,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.grandcraftauto.game.apartment.Apartment;
+import com.grandcraftauto.game.missions.objectives.PlaceBlockObjective;
 import com.grandcraftauto.game.missions.objectives.ReachDestinationObjective;
 import com.grandcraftauto.game.player.GPlayer;
 import com.grandcraftauto.utils.Utils;
@@ -28,21 +29,25 @@ public final class GPS {
 		inv.setItem(1, Utils.renameItem(new ItemStack(Material.IRON_HOE), ChatColor.DARK_RED + "Ammu" + ChatColor.WHITE + "Nation"));
 		inv.setItem(2, Utils.renameItem(new ItemStack(Material.MINECART), ChatColor.GRAY + "Car Dealership"));
 		inv.setItem(3, Utils.renameItem(new ItemStack(Material.WOOD_DOOR), ChatColor.GOLD + "Apartment Complex"));
+		inv.setItem(4, Utils.renameItem(new ItemStack(Material.GRILLED_PORK), ChatColor.GRAY + "Gas Station"));
 		inv.setItem(5, Utils.renameItem(new ItemStack(Material.GOLD_NUGGET), ChatColor.GOLD + "Bank"));
 		inv.setItem(6, Utils.renameItem(new ItemStack(Material.COOKED_BEEF), ChatColor.DARK_AQUA + "Burgershot"));
 		inv.setItem(7, Utils.renameItem(new ItemStack(Material.SKULL_ITEM), ChatColor.DARK_GRAY + "Black Market"));
-		if(gplayer.hasApartment() == false){
-			inv.setItem(13, Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.DARK_RED + "Cancel Route"));
-		}
-		if(gplayer.hasMission() == true && gplayer.getObjective() instanceof ReachDestinationObjective){
+		if(gplayer.hasMission() == true && (gplayer.getObjective() instanceof ReachDestinationObjective || gplayer.getObjective() instanceof PlaceBlockObjective)){
 			if(gplayer.hasApartment() == true){
 				inv.setItem(12, Utils.renameItem(new ItemStack(Material.WOOD_DOOR), ChatColor.GOLD + "Apartments"));
 				inv.setItem(13, Utils.renameItem(new ItemStack(Material.COMPASS), ChatColor.GOLD + "Mission Objective"));
 				inv.setItem(14, Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.DARK_RED + "Cancel Route"));
 			}else{
 				inv.setItem(12, Utils.renameItem(new ItemStack(Material.COMPASS), ChatColor.GOLD + "Mission Objective"));
-				inv.setItem(13, null);
 				inv.setItem(14, Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.DARK_RED + "Cancel Route"));
+			}
+		}else{
+			if(gplayer.hasApartment() == true){
+				inv.setItem(12, Utils.renameItem(new ItemStack(Material.WOOD_DOOR), ChatColor.GOLD + "Apartments"));
+				inv.setItem(14, Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.DARK_RED + "Cancel Route"));
+			}else{
+				inv.setItem(13, Utils.renameItem(new ItemStack(Material.PAPER), ChatColor.DARK_RED + "Cancel Route"));
 			}
 		}
 		return inv;

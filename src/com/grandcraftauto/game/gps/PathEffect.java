@@ -5,7 +5,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.gmail.filoghost.holograms.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.grandcraftauto.core.Main;
 
 public class PathEffect {

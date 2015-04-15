@@ -9,8 +9,8 @@ public class ReachDestinationObjective extends Objective{
 
 	private Location destination;
 	
-	public ReachDestinationObjective(String desc, Dialogue dialogue, Location destination){
-		super(desc, dialogue);
+	public ReachDestinationObjective(String desc, Dialogue dialogue, boolean revert, Location destination){
+		super(desc, dialogue, revert);
 		this.destination = destination;
 	}
 	

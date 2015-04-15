@@ -9,9 +9,6 @@ import com.grandcraftauto.game.player.GPlayer;
 
 public class ApartmentChest{
 	
-	private String gray = ChatColor.GRAY + "";
-	//private String gold = ChatColor.GOLD + "";
-	
 	private GPlayer gplayer;
 	private Chest chest;
 	private String path;
@@ -70,7 +67,7 @@ public class ApartmentChest{
 	 * @return The chest's inventory
 	 */
 	public Inventory getInventory(){
-		Inventory inv = Bukkit.createInventory(chest, chest.getInventory().getSize(), gray + "Apartment Chest");
+		Inventory inv = Bukkit.createInventory(chest, chest.getInventory().getSize(), ChatColor.DARK_GRAY + "Apartment Chest");
 		for(int x = 0; x <= this.getTotalItems(); x++){
 			if(gplayer.getFile().getConfig().getItemStack(path + ".items." + x) != null){
 				inv.setItem(x, gplayer.getFile().getConfig().getItemStack(path + ".items." + x));

@@ -28,6 +28,8 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
+import ca.wacos.nametagedit.NametagAPI;
+
 import com.grandcraftauto.core.Main;
 import com.grandcraftauto.game.InvokedGroup;
 import com.grandcraftauto.game.MentalState;
@@ -60,11 +62,12 @@ import com.grandcraftauto.game.missions.SideMission;
 import com.grandcraftauto.game.missions.SideMissionType;
 import com.grandcraftauto.game.missions.objectives.ApproachObjective;
 import com.grandcraftauto.game.missions.objectives.HoldUpObjective;
+import com.grandcraftauto.game.missions.objectives.KillTargetObjective;
 import com.grandcraftauto.game.missions.objectives.ObtainItemsObjective;
 import com.grandcraftauto.game.pathfinding.AStar;
+import com.grandcraftauto.game.pathfinding.AStar.InvalidPathException;
 import com.grandcraftauto.game.pathfinding.PathingResult;
 import com.grandcraftauto.game.pathfinding.Tile;
-import com.grandcraftauto.game.pathfinding.AStar.InvalidPathException;
 import com.grandcraftauto.game.weapons.Grenade;
 import com.grandcraftauto.game.weapons.Gun;
 import com.grandcraftauto.game.weapons.Shotgun;
@@ -78,8 +81,6 @@ import com.grandcraftauto.utils.Help;
 import com.grandcraftauto.utils.TextUtils;
 import com.grandcraftauto.utils.TitleUtils;
 import com.grandcraftauto.utils.Utils;
-
-import ca.wacos.nametagedit.NametagAPI;
 
 public class GPlayer implements CrewMember{
 	
@@ -99,8 +100,12 @@ public class GPlayer implements CrewMember{
 		playerFile = new PlayerFile(p.getName());
 	}
 	
+	@SuppressWarnings("deprecation")
 	public GPlayer(String pName){
 		playerName = pName;
+		if(Utils.isOnline(pName) == true){
+			player = Bukkit.getPlayer(pName);
+		}
 		playerFile = new PlayerFile(pName);
 	}
 	
@@ -169,59 +174,61 @@ public class GPlayer implements CrewMember{
 	public void sendCommandHelp(Help type, int page){
 		if(type == Help.GENERAL){
 			this.sendMessageHeader("Command Help");
-			this.sendMessage(gold + "/mission " + gray + "- Get your current mission overview!");
-			this.sendMessage(gold + "/mission cancel " + gray + "- Cancel your current mission!");
-			this.sendMessage(gold + "/job " + gray + "- Manage your current job!");
-			this.sendMessage(gold + "/stats [player]" + gray + "- Review your statistics!");
-			this.sendMessage(gold + "/apartment " + gray + "- Get information about your apartment!");
-			this.sendMessage(gold + "/crew " + gray + "- Get information about your crew!");
-			this.sendMessage(gold + "/friends " + gray + "- Manage your friends!");
-			this.sendMessage(gold + "/top " + gray + "- Retrieve a leaderboard!");
+			this.sendMessage(gold + "/mission " + gray + "- Get your current mission overview.");
+			this.sendMessage(gold + "/mission cancel " + gray + "- Cancel your current mission.");
+			this.sendMessage(gold + "/job " + gray + "- Manage your current job.");
+			this.sendMessage(gold + "/stats [player]" + gray + "- Review your statistics.");
+			this.sendMessage(gold + "/apartment " + gray + "- Get information about your apartment.");
+			this.sendMessage(gold + "/crew " + gray + "- Get information about your crew.");
+			this.sendMessage(gold + "/friends " + gray + "- Manage your friends.");
+			this.sendMessage(gold + "/top " + gray + "- Retrieve a leaderboard.");
 		}else if(type == Help.APARTMENT){
 			this.sendMessageHeader("Apartment Help");
-			this.sendMessage(gold + "/apartment list " + gray + "- Get the list of apartments you own!");
-			this.sendMessage(gold + "/apartment set primary " + gray + "- Set your primary apartment!");
-			this.sendMessage(gold + "/apartment pay rent " + gray + "- Pay your apartment rent!");
-			this.sendMessage(gold + "/apartment allow crew " + gray + "- Allow crew into your apartment!");
+			this.sendMessage(gold + "/apartment list " + gray + "- Get the list of apartments you own.");
+			this.sendMessage(gold + "/apartment set primary " + gray + "- Set your primary apartment.");
+			this.sendMessage(gold + "/apartment pay rent " + gray + "- Pay your apartment rent.");
+			this.sendMessage(gold + "/apartment allow crew " + gray + "- Allow crew into your apartment.");
 		}else if(type == Help.CREW){
 			this.sendMessageHeader("Crew Help");
 			if(page > 2){
 				page = 2;
 			}
 			if(page == 1){
-				this.sendMessage(gold + "/crew list " + gray + "- Get the list of crews!");
-				this.sendMessage(gold + "/crew info <name> " + gray + "- Get information of a crew!");
-				this.sendMessage(gold + "/crew create <name> " + gray + "- Create a new crew!");
-				this.sendMessage(gold + "/crew invite <player> " + gray + "- Invite a player to your crew!");
-				this.sendMessage(gold + "/crew join <crew> " + gray + "- Join a crew!");
-				this.sendMessage(gold + "/crew leave " + gray + "- Leave your crew!");
-				this.sendMessage(gold + "/crew kick <player> " + gray + "- Kick a member from your crew!");
+				this.sendMessage(gold + "/crew list " + gray + "- Get the list of crews.");
+				this.sendMessage(gold + "/crew info <name> " + gray + "- Get information of a crew.");
+				this.sendMessage(gold + "/crew create <name> " + gray + "- Create a new crew.");
+				this.sendMessage(gold + "/crew invite <player> " + gray + "- Invite a player to your crew.");
+				this.sendMessage(gold + "/crew join <crew> " + gray + "- Join a crew.");
+				this.sendMessage(gold + "/crew leave " + gray + "- Leave your crew.");
+				this.sendMessage(gold + "/crew kick <player> " + gray + "- Kick a member from your crew.");
 				player.sendMessage("");
-				this.sendMessage("Type " + gold + "/crew help " + (page + 1) + gray + " for more commands!");
+				this.sendMessage("Type " + gold + "/crew help " + (page + 1) + gray + " for more commands.");
 			}else if(page == 2){
-				this.sendMessage(gold + "/crew chat " + gray + "- Toggle crew chat!");
-				this.sendMessage(gold + "/crew colors  " + gray + "- Change the crew colors!");
-				this.sendMessage(gold + "/crew promote <player> " + gray + "- Promote a player in your crew!");
-				this.sendMessage(gold + "/crew demote <player> " + gray + "- Demote a player in your crew!");
-				this.sendMessage(gold + "/crew rename <name> " + gray + "- Demote a player in your crew!");
-				this.sendMessage(gold + "/crew setleader <player>  " + gray + "- Set the leader of the crew!");
-				this.sendMessage(gold + "/crew disband  " + gray + "- Disband the crew!");
+				this.sendMessage(gold + "/crew chat " + gray + "- Toggle crew chat.");
+				this.sendMessage(gold + "/crew colors  " + gray + "- Change the crew colors.");
+				this.sendMessage(gold + "/crew promote <player> " + gray + "- Promote a player in your crew.");
+				this.sendMessage(gold + "/crew demote <player> " + gray + "- Demote a player in your crew.");
+				this.sendMessage(gold + "/crew rename <name> " + gray + "- Demote a player in your crew.");
+				this.sendMessage(gold + "/crew setleader <player>  " + gray + "- Set the leader of the crew.");
+				this.sendMessage(gold + "/crew disband  " + gray + "- Disband the crew.");
 				//player.sendMessage("");
-				//this.sendMessage("Type " + gold + "/crew help " + (page + 1) + gray + " for more commands!");
+				//this.sendMessage("Type " + gold + "/crew help " + (page + 1) + gray + " for more commands.");
 			}
 		}else if(type == Help.FRIENDS){
 			this.sendMessageHeader("Friends Help");
-			this.sendMessage(gold + "/friends list " + gray + "- Retrieve your friends list!");
-			this.sendMessage(gold + "/friends request <player> " + gray + "- Add a friend!");
-			this.sendMessage(gold + "/friends remove <player> " + gray + "- Remove a friend!");
-			this.sendMessage(gold + "/friends tp <player> " + gray + "- Teleport to a friend!");
+			this.sendMessage(gold + "/friends list " + gray + "- Retrieve your friends list.");
+			this.sendMessage(gold + "/friends request <player> " + gray + "- Add a friend.");
+			this.sendMessage(gold + "/friends remove <player> " + gray + "- Remove a friend.");
+			this.sendMessage(gold + "/friends tp <player> " + gray + "- Teleport to a friend.");
 		}else if(type == Help.JOB){
 			this.sendMessageHeader("Job Help");
-			this.sendMessage(gold + "/job quit " + gray + "- Quit your current job!");
+			this.sendMessage(gold + "/job list " + gray + "- Get the list of jobs.");
+			this.sendMessage(gold + "/job join <job> " + gray + "- Join a job.");
+			this.sendMessage(gold + "/job quit " + gray + "- Quit your current job.");
 		}else if(type == Help.TOP){
 			this.sendMessageHeader("Leaderboards");
 			for(LeaderboardType t : LeaderboardType.values()){
-				this.sendMessage(gold + "/top " + t.toString().toLowerCase() + gray + " - Get the " + t.toString().toLowerCase() + " leaderboard!");
+				this.sendMessage(gold + "/top " + t.toString().toLowerCase() + gray + " - Get the " + t.toString().toLowerCase() + " leaderboard.");
 			}
 		}
 	}
@@ -259,6 +266,14 @@ public class GPlayer implements CrewMember{
 	 */
 	public void sendTabTitle(String title, String subtitle){
 		TitleUtils.sendTabTitle(player, title, subtitle);
+	}
+	
+	/**
+	 * Send an action bar message to the player
+	 * @param message - The message to send to the player via the action bar
+	 */
+	public void sendActionBar(String message){
+		TitleUtils.sendActionBar(player, message);
 	}
 	
 	/**
@@ -344,13 +359,19 @@ public class GPlayer implements CrewMember{
 		obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 		
 		if(this.hasJob() == false || this.getJobInstance().getState() == JobState.WAITING){
-			obj.setDisplayName(gray + "GCA");
+			obj.setDisplayName(gray + "Stats");
 			scores.add(obj.getScore(gold + TextUtils.arrow(0) + "Wallet"));
 			scores.add(obj.getScore(ChatColor.LIGHT_PURPLE + gray + "$" + (int)this.getWalletBalance()));
 			scores.add(obj.getScore(gold + TextUtils.arrow(0) + "Bank"));
 			scores.add(obj.getScore(ChatColor.DARK_PURPLE + gray + "$" + (int)this.getBankBalance()));
-			scores.add(obj.getScore(gold + TextUtils.arrow(0) + "State"));
-			scores.add(obj.getScore(this.getMentalState().getColor() + WordUtils.capitalizeFully(this.getMentalState().toString())));
+			if(main.invoked.containsKey(player.getName()) == false || main.invoked.get(player.getName()).getVillagerType() != VillagerType.COP){
+				scores.add(obj.getScore(gold + TextUtils.arrow(0) + "State"));
+				scores.add(obj.getScore(this.getMentalState().getColor() + WordUtils.capitalizeFully(this.getMentalState().toString())));
+			}else{
+				InvokedTask task = main.invoked.get(player.getName());
+				scores.add(obj.getScore(gold + TextUtils.arrow(0) + "Wanted"));
+				scores.add(obj.getScore(gray + task.getStars(task.getRealWantedLevel())));
+			}
 			scores.add(obj.getScore(""));
 			scores.add(obj.getScore(gold + "Level: " + gray + this.getLevel()));
 			scores.add(obj.getScore(gold + "KDR: " + gray + this.getKDR()));
@@ -553,7 +574,7 @@ public class GPlayer implements CrewMember{
 	public void sendAvailableMissions(){
 		List<Character> givers = new ArrayList<Character>();
 		List<Mission> availableMissions = new ArrayList<Mission>();
-		for(Mission m : Mission.values()){
+		for(Mission m : Mission.list()){
 			if(m.getType() == MissionType.REGULAR){
 				if(this.hasCompletedMission(m.getID()) == false){
 					if(!givers.contains(m.getGiver())){
@@ -586,7 +607,73 @@ public class GPlayer implements CrewMember{
 				player.sendMessage(gold + "   " + TextUtils.getArrow() + " Minimum Level: " + gray + m.getMinimumLevel());
 			}
 		}else{
-			this.sendMessage("You do not have any available missions at this time.");
+			this.sendMessage("You do not have any available missions at this time. You have completed " + gold + this.getCompletedMissions() + "/" + Mission.getTotalMissions() + gray + " missions.");
+		}
+	}
+	
+	/**
+	 * Attempt to give the player a mission from the npc
+	 * @param npc - The npc to give a mission from
+	 */
+	public void attemptToGiveMission(String npc){
+		List<Character> givers = new ArrayList<Character>();
+		List<Mission> availableMissions = new ArrayList<Mission>();
+		boolean hasAnyMore = false;
+		for(Mission m : Mission.list()){
+			if(m.getGiver().getName().equalsIgnoreCase(npc)){
+				if(m.getType() == MissionType.REGULAR){
+					if(this.hasCompletedMission(m.getID()) == false){
+						hasAnyMore = true;
+						if(!givers.contains(m.getGiver())){
+							if(this.getLevel() >= m.getMinimumLevel()){
+								availableMissions.add(m);
+								givers.add(m.getGiver());
+							}
+						}
+					}
+				}else if(m.getType() == MissionType.SIDE_MISSION){
+					if(SideMission.getSideMission(SideMissionType.DAILY) != null && SideMission.getSideMission(SideMissionType.DAILY).getID() == m.getID()){
+						if(this.canCompleteSideMission(SideMissionType.DAILY) == true){
+							hasAnyMore = true;
+							if(this.getLevel() >= m.getMinimumLevel()){
+								availableMissions.add(m);
+								givers.add(m.getGiver());
+							}
+						}
+					}
+				}
+			}
+		}
+		boolean isRegularMission = false;
+		boolean isSideMission = false;
+		Mission mission = null;
+		if(availableMissions.size() > 0){
+			for(Mission m : availableMissions){
+				if(m.getType() == MissionType.SIDE_MISSION){
+					isSideMission = true;
+				}else if(m.getType() == MissionType.REGULAR){
+					isRegularMission = true;
+				}
+				mission = m;
+			}
+		}
+		if(mission != null){
+			if(isRegularMission == true && isSideMission == true){
+				Inventory inv = Bukkit.createInventory(null, 9, gray + "Select Mission - " + npc);
+				inv.setItem(3, Utils.renameItem(new ItemStack(Material.WOOL, 1, (short) 5), gold + "Regular Mission"));
+				inv.setItem(5, Utils.renameItem(new ItemStack(Material.WOOL, 1, (short) 1), gold + "Daily Mission"));
+				player.openInventory(inv);
+			}else{
+				this.setMission(mission.getID());
+				this.sendMessageHeader("New Mission");
+				this.sendMissionOverview(false);
+			}
+		}else{
+			if(hasAnyMore == false){
+				this.sendMessage(gold + npc + ": " + gray + "I don't have any more missions for you.");
+			}else{
+				this.sendMessage(gold + npc + ": " + gray + "I have some missions for you, but you are not a high enough level.");
+			}
 		}
 	}
 	
@@ -687,8 +774,6 @@ public class GPlayer implements CrewMember{
 	 * Fire the player's death
 	 */
 	public void death(){
-		boolean fire = true;
-		
 		if(this.hasJob() == true && this.getJobInstance().getState() == JobState.STARTED){
 			JobInstance jobinstance = this.getJobInstance();
 			if(jobinstance.getJob() instanceof FreeForAll){
@@ -707,121 +792,125 @@ public class GPlayer implements CrewMember{
 		}
 		player.setVelocity(new Vector(0.0D, 0.1D, 0.0D));
 		
-		if(fire == true){
-			this.removeBar();
-			this.setDeaths(this.getDeaths() + 1);
-			this.refreshScoreboard();
-			
-			LivingEntity k = null;
-			if(player.getKiller() != null){
-				k = player.getKiller();
-			}else if(main.playerkiller.containsKey(player.getName())){
-				k = main.playerkiller.get(player.getName());
-			}
-			if(k != null){
-				if(k instanceof Player){
-					Player killer = (Player) k;
-					if(!main.killCooldown.contains(killer.getName())){
-						GPlayer gkiller = new GPlayer(killer);
-						gkiller.setKills(gkiller.getKills() + 1);
-						if(gkiller.hasJob() == true && gkiller.getJobInstance().getState() == JobState.STARTED){
-							JobInstance jobinstance = gkiller.getJobInstance();
-							if(gkiller.getJobInstance().getJob() instanceof FreeForAll){
-								FreeForAll ffa = (FreeForAll) jobinstance.getJob();
-								int kills = jobinstance.getPlayerValue(killer, ValueType.KILLS) + 1;
-								if(kills >= ffa.getKillsRequired()){
-									jobinstance.end(killer.getName());
-								}else{
-									jobinstance.setPlayerValue(killer, ValueType.KILLS, kills);
-									jobinstance.refreshPlayerScoreboards();
-									gkiller.sendNotification("Free for All", "You now have " + gold + kills + "/" + ffa.getKillsRequired() + gray + " kills!");
-								}
-							}else if(gkiller.getJobInstance().getJob() instanceof TeamDeathmatch){
-								TeamDeathmatch tdm = (TeamDeathmatch) jobinstance.getJob();
-								int team = jobinstance.getPlayerTeam(killer);
-								int kills = jobinstance.getTeamValue(team, ValueType.KILLS) + 1;
-								if(kills >= tdm.getKillsRequired()){
-									jobinstance.end(jobinstance.getTeamName(team));
-								}else{
-									jobinstance.setTeamValue(team, ValueType.KILLS, kills);
-									jobinstance.refreshPlayerScoreboards();
-									gkiller.sendNotification("Team Deathmatch", "Your team now has " + gold + kills + "/" + tdm.getKillsRequired() + gray + " kills!");
-								}
+		this.removeBar();
+		this.setDeaths(this.getDeaths() + 1);
+		this.refreshScoreboard();
+		
+		LivingEntity k = null;
+		if(player.getKiller() != null){
+			k = player.getKiller();
+		}else if(main.playerkiller.containsKey(player.getName())){
+			k = main.playerkiller.get(player.getName());
+		}
+		if(k != null){
+			if(k instanceof Player){
+				Player killer = (Player) k;
+				if(!main.killCooldown.contains(killer.getName())){
+					GPlayer gkiller = new GPlayer(killer);
+					gkiller.setKills(gkiller.getKills() + 1);
+					if(gkiller.hasJob() == true && gkiller.getJobInstance().getState() == JobState.STARTED){
+						JobInstance jobinstance = gkiller.getJobInstance();
+						if(gkiller.getJobInstance().getJob() instanceof FreeForAll){
+							FreeForAll ffa = (FreeForAll) jobinstance.getJob();
+							int kills = jobinstance.getPlayerValue(killer, ValueType.KILLS) + 1;
+							if(kills >= ffa.getKillsRequired()){
+								jobinstance.end(killer.getName());
+							}else{
+								jobinstance.setPlayerValue(killer, ValueType.KILLS, kills);
+								jobinstance.refreshPlayerScoreboards();
+								gkiller.sendNotification("Free for All", "You now have " + gold + kills + "/" + ffa.getKillsRequired() + gray + " kills!");
 							}
-						}else{
-							Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted by " + gold + killer.getName() + gray + "!");
-							this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You were killed by " + killer.getName() + ".");
-							gkiller.addMentalState(10);
-						}
-						
-						if(main.bounties.containsKey(player.getName())){
-							int amount = main.bounties.get(player.getName());
-							gkiller.setWalletBalance(gkiller.getWalletBalance() + amount);
-							gkiller.sendMessage("You have collected " + gold + player.getName() + gray + "'s " + gold + "$" + amount + gray + " bounty!");
-							main.bounties.remove(player.getName());
-						}
-						
-						killer.playSound(killer.getEyeLocation(), Sound.SUCCESSFUL_HIT, 10, 1);
-						
-						double difference = gkiller.getMentalState().getDifference(this.getMentalState());
-						if(difference > 1){
-							int xpToRemove = (int)(difference * 4);
-							if((gkiller.getXP() - xpToRemove) > 0){
-								gkiller.removeXP(xpToRemove);
+						}else if(gkiller.getJobInstance().getJob() instanceof TeamDeathmatch){
+							TeamDeathmatch tdm = (TeamDeathmatch) jobinstance.getJob();
+							int team = jobinstance.getPlayerTeam(killer);
+							int kills = jobinstance.getTeamValue(team, ValueType.KILLS) + 1;
+							if(kills >= tdm.getKillsRequired()){
+								jobinstance.end(jobinstance.getTeamName(team));
+							}else{
+								jobinstance.setTeamValue(team, ValueType.KILLS, kills);
+								jobinstance.refreshPlayerScoreboards();
+								gkiller.sendNotification("Team Deathmatch", "Your team now has " + gold + kills + "/" + tdm.getKillsRequired() + gray + " kills!");
 							}
-							if(gkiller.getWalletBalance() >= 50){
-								gkiller.setWalletBalance(gkiller.getWalletBalance() - 50);
-							}else if(gkiller.getBankBalance() >= 50){
-								gkiller.setBankBalance(gkiller.getBankBalance() - 50);
-							}
-							gkiller.sendError("You are losing money and RP due to your high mental state!");
-						}else if(difference < 0){
-							gkiller.addXP(Math.abs(difference * 4));
 						}
-						
-						gkiller.refreshScoreboard();
-						main.killCooldown.add(killer.getName());
-					}
-				}else{
-					if(k.getCustomName() != null){
-						Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted by a " + gold + ChatColor.stripColor(k.getCustomName()) + gray + "!");
-						this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You were killed by a " + ChatColor.stripColor(k.getCustomName()) + ".");
 					}else{
-						Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted by a " + gold + WordUtils.capitalizeFully(k.getType().toString().replaceAll("_", " ")) + gray + "!");
-						this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You were killed by a " + WordUtils.capitalizeFully(k.getType().toString().replaceAll("_", " ")));
+						Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted by " + gold + killer.getName() + gray + "!");
+						this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You were killed by " + killer.getName() + ".");
+						gkiller.addMentalState(10);
 					}
+					
+					if(main.bounties.containsKey(player.getName())){
+						int amount = main.bounties.get(player.getName());
+						gkiller.setWalletBalance(gkiller.getWalletBalance() + amount);
+						gkiller.sendMessage("You have collected " + gold + player.getName() + gray + "'s " + gold + "$" + amount + gray + " bounty!");
+						main.bounties.remove(player.getName());
+					}
+					
+					killer.playSound(killer.getEyeLocation(), Sound.SUCCESSFUL_HIT, 10, 1);
+					
+					double difference = gkiller.getMentalState().getDifference(this.getMentalState());
+					if(difference > 1){
+						int xpToRemove = (int)(difference * 4);
+						if((gkiller.getXP() - xpToRemove) > 0){
+							gkiller.removeXP(xpToRemove);
+						}
+						if(gkiller.getWalletBalance() >= 50){
+							gkiller.setWalletBalance(gkiller.getWalletBalance() - 50);
+						}else if(gkiller.getBankBalance() >= 50){
+							gkiller.setBankBalance(gkiller.getBankBalance() - 50);
+						}
+						gkiller.sendError("You are losing money and RP due to your high mental state!");
+					}else if(difference < 0){
+						gkiller.addXP(Math.abs(difference * 4));
+					}
+					
+					gkiller.refreshScoreboard();
+					main.killCooldown.add(killer.getName());
 				}
 			}else{
-				Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted" + gray + "!");
-				this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You have comitted suicide.");
-			}
-			
-			if(main.invoked.containsKey(player.getName())){
-				main.invoked.get(player.getName()).cancel();
-				main.invoked.get(player.getName()).clearTask(false);
-				main.invoked.remove(player.getName());
-			}
-			
-			if(this.hasMission() == true){
-				if(this.getObjective() instanceof ObtainItemsObjective){
-					ObtainItemsObjective obj = (ObtainItemsObjective) this.getObjective();
-					obj.setAmountObtained(player.getName(), 0);
-					this.removeMaterialFromInventory(obj.getItemType(), this.getAmountOfMaterialInInventory(obj.getItemType()));
+				if(k.getCustomName() != null){
+					Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted by a " + gold + ChatColor.stripColor(k.getCustomName()) + gray + "!");
+					this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You were killed by a " + ChatColor.stripColor(k.getCustomName()) + ".");
+				}else{
+					Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted by a " + gold + WordUtils.capitalizeFully(k.getType().toString().replaceAll("_", " ")) + gray + "!");
+					this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You were killed by a " + WordUtils.capitalizeFully(k.getType().toString().replaceAll("_", " ")));
 				}
 			}
-			
-			this.removePotionEffects();
-			if(player.hasMetadata("kidneyStolen") == true){
-				player.removeMetadata("kidneyStolen", main);
-			}
-			player.setHealth(20);
-			player.setFoodLevel(20);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 80, 1));
-			if(main.playerkiller.containsKey(player.getName())){
-				main.playerkiller.remove(player.getName());
-			}
 		}else{
-			player.setHealth(20);
+			Utils.broadcastMessage(gold + player.getName() + gray + " has been wasted" + gray + "!");
+			this.sendTitle(ChatColor.DARK_RED + "WASTED", ChatColor.GRAY + "You have comitted suicide.");
+		}
+		
+		if(main.invoked.containsKey(player.getName())){
+			main.invoked.get(player.getName()).cancel();
+			main.invoked.get(player.getName()).clearTask(false);
+			main.invoked.remove(player.getName());
+		}
+		
+		this.killPersonalVillagers();
+		
+		if(this.hasMission() == true){
+			if(this.getObjective() instanceof ObtainItemsObjective){
+				ObtainItemsObjective obj = (ObtainItemsObjective) this.getObjective();
+				obj.setAmountObtained(player.getName(), 0);
+				this.removeMaterialFromInventory(obj.getItemType(), this.getAmountOfMaterialInInventory(obj.getItemType()));
+			}
+			if(this.getMission() == Mission.EXPLOSIVE_ENTRANCE && this.getObjective() instanceof KillTargetObjective){
+				InventoryHandler.addItemToAppropriateSlot(player, Utils.getC4Item());
+			}
+			if(this.getObjective().shouldRevertOnDeath() == true){
+				this.setCurrentObjectiveID(this.getCurrentObjectiveID() - 1);
+			}
+		}
+		
+		this.removePotionEffects();
+		if(player.hasMetadata("kidneyStolen") == true){
+			player.removeMetadata("kidneyStolen", main);
+		}
+		player.setHealth(20);
+		player.setFoodLevel(19);
+		player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 80, 1));
+		if(main.playerkiller.containsKey(player.getName())){
+			main.playerkiller.remove(player.getName());
 		}
 	}
 	
@@ -883,6 +972,20 @@ public class GPlayer implements CrewMember{
 	}
 	
 	/**
+	 * Kill the player's personal villagers
+	 */
+	public void killPersonalVillagers(){
+		if(main.personalVillagers.containsKey(player.getName())){
+			for(Villager v : main.personalVillagers.get(player.getName())){
+				if(v.isDead() == false && v.isValid() == true){
+					v.remove();
+				}
+			}
+			main.personalVillagers.remove(player.getName());
+		}
+	}
+	
+	/**
 	 * Remove all the armor from the player
 	 */
 	public void clearArmor(){
@@ -890,6 +993,24 @@ public class GPlayer implements CrewMember{
 		player.getInventory().setChestplate(null);
 		player.getInventory().setLeggings(null);
 		player.getInventory().setBoots(null);
+	}
+	
+	/**
+	 * Repair the player's armor
+	 */
+	public void repairArmor(){
+		if(player.getInventory().getHelmet() != null){
+			player.getInventory().getHelmet().setDurability((short)0);
+		}
+		if(player.getInventory().getChestplate() != null){
+			player.getInventory().getChestplate().setDurability((short)0);
+		}
+		if(player.getInventory().getLeggings() != null){
+			player.getInventory().getLeggings().setDurability((short)0);
+		}
+		if(player.getInventory().getBoots() != null){
+			player.getInventory().getBoots().setDurability((short)0);
+		}
 	}
 	
 	/**
@@ -939,12 +1060,7 @@ public class GPlayer implements CrewMember{
 				}
 				
 				if(allowShot == true){
-					if(weapon instanceof Gun){
-						main.shootCooldown.add(player.getName());
-						Gun gun = (Gun) this.getWeaponInHand();
-						ShootTask task = new ShootTask(player, gun);
-						task.runTaskTimer(main, 0, gun.getFiringRate());
-					}else if(weapon instanceof Shotgun){
+					if(weapon instanceof Shotgun){
 						main.shootCooldown.add(player.getName());
 						Shotgun shotgun = (Shotgun) this.getWeaponInHand();
 						
@@ -961,6 +1077,11 @@ public class GPlayer implements CrewMember{
 								main.shootCooldown.remove(player.getName());
 							}
 						}, shotgun.getCooldown());
+					}else if(weapon instanceof Gun){
+						main.shootCooldown.add(player.getName());
+						Gun gun = (Gun) this.getWeaponInHand();
+						ShootTask task = new ShootTask(player, gun);
+						task.runTaskTimer(main, 0, gun.getFiringRate());
 					}else if(weapon instanceof Grenade){
 						final Grenade grenade = (Grenade) this.getWeaponInHand();
 						main.grenadeID += 1;
@@ -1108,33 +1229,50 @@ public class GPlayer implements CrewMember{
 	 * @param end - The location of the destination
 	 */
 	public void setDestination(String destination, Location end){
-		if(this.hasDestination() == true){
-			this.removeDestination();
-		}
-		Location start = player.getLocation().subtract(0, 1, 0);
-		if(player.getVehicle() != null){
-			start = player.getLocation();
-		}
-		if(end.getBlock().getType() == Material.AIR || end.getBlock() == null){
-			end = end.subtract(0, 1, 0);
-		}
-		if(start.distance(end) < 200){
-			try{
-				AStar path = new AStar(start, end, 200);
-				ArrayList<Tile> route = path.iterate();
-				PathingResult result = path.getPathingResult();
-				
-				if(result == PathingResult.SUCCESS){
-					Utils.createPathEffect(player, start, end, route);
-					this.sendNotification("GPS", "You have set your destination to " + gold + destination + gray + "!");
-				}else{
+		if(main.gpsCooldown.contains(player.getName()) == false){
+			if(this.hasDestination() == true){
+				this.removeDestination();
+			}
+			Location start = player.getLocation().subtract(0, 1, 0);
+			if(player.getVehicle() != null){
+				start = player.getLocation();
+			}
+			if(end.getBlock().getType() == Material.AIR || end.getBlock() == null){
+				end = end.subtract(0, 1, 0);
+			}
+			if(start.distance(end) < 200){
+				try{
+					AStar path = new AStar(start, end, 200);
+					ArrayList<Tile> route = path.iterate();
+					PathingResult result = path.getPathingResult();
+					
+					if(result == PathingResult.SUCCESS){
+						Utils.createPathEffect(player, start, end, route);
+						this.sendNotification("GPS", "You have set your destination to " + gold + destination + gray + "!");
+						main.gpsCooldown.add(player.getName());
+						main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
+							public void run(){
+								main.gpsCooldown.remove(player.getName());
+							}
+						}, 600);
+						main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
+							public void run(){
+								if(hasDestination() == true){
+									removeDestination();
+								}
+							}
+						}, 1800);
+					}else{
+						this.sendNotification("GPS", "A valid path could not be found.");
+					}
+				}catch (InvalidPathException e){
 					this.sendNotification("GPS", "A valid path could not be found.");
 				}
-			}catch (InvalidPathException e){
-				this.sendNotification("GPS", "A valid path could not be found.");
+			}else{
+				this.sendNotification("GPS", "Destination is too far away to calculate a route.");
 			}
 		}else{
-			this.sendNotification("GPS", "Destination is too far away to calculate a route.");
+			this.sendNotification("GPS", "Please wait before setting another destination.");
 		}
 	}
 	
@@ -1304,14 +1442,15 @@ public class GPlayer implements CrewMember{
 	 * @param type - The type of villager to invoke
 	 * @return The task that has been created
 	 */
-	public InvokedTask setHasInvoked(VillagerType type, String gangName){
+	public InvokedTask setHasInvoked(VillagerType type, int wantedLevel, String gangName){
 		if(!main.invoked.containsKey(player.getName())){
 			InvokedTask task = new InvokedTask(player, new InvokedGroup(type, gangName));
 			task.runTaskTimer(main, 0, 3);
 			if(type == VillagerType.COP){
-				task.setWantedLevel(1);
+				task.setWantedLevel(wantedLevel);
 			}
 			main.invoked.put(player.getName(), task);
+			this.refreshScoreboard();
 			return task;
 		}else{
 			return null;
@@ -1345,9 +1484,9 @@ public class GPlayer implements CrewMember{
 			}
 			if(!main.invoked.containsKey(player.getName())){
 				if(type == VillagerType.COP){
-					this.setHasInvoked(type, null);
+					this.setHasInvoked(type, 1, null);
 				}else if(type == VillagerType.GANG_MEMBER){
-					this.setHasInvoked(type, ChatColor.stripColor(villager.getCustomName()));
+					this.setHasInvoked(type, 0, ChatColor.stripColor(villager.getCustomName()));
 				}
 			}else{
 				InvokedTask task = main.invoked.get(player.getName());
@@ -1439,7 +1578,7 @@ public class GPlayer implements CrewMember{
 	 * @return The player's mental state
 	 */
 	public MentalState getMentalState(){
-		MentalState state = null;
+		MentalState state = MentalState.NORMAL;
 		for(MentalState s : MentalState.values()){
 			if(s.fallsInRange(this.getMentalStateValue())){
 				state = s;
@@ -1601,29 +1740,29 @@ public class GPlayer implements CrewMember{
 			this.sendNotification("Level Up", "You are now level " + gold + newlevel + gray + "!");
 			for(Car c : Car.values()){
 				if(c.getMinimumLevel() == newlevel){
-					player.sendMessage(gray + "   + Car Unlock: " + gold + c.getName());
+					player.sendMessage(gray + "  + Car Unlock: " + gold + c.getName());
 				}
 			}
-			for(Mission m : Mission.values()){
+			for(Mission m : Mission.list()){
 				if(m.getMinimumLevel() == newlevel && m.getType() != MissionType.SIDE_MISSION){
-					player.sendMessage(gray + "   + Mission Unlock: " + gold + "\"" + m.getName() + "\"");
+					player.sendMessage(gray + "  + Mission Unlock: " + gold + "\"" + m.getName() + "\"");
 				}
 			}
 			for(Weapon w : Weapon.list()){
 				if(w.getMinimumLevel() == newlevel){
-					player.sendMessage(gray + "   + Weapon Unlock: " + gold + w.getName());
+					player.sendMessage(gray + "  + Weapon Unlock: " + gold + w.getName());
 				}
 			}
 			if(newlevel < 30){
 				this.addThugPoints(1);
-				player.sendMessage(gray + "   + Thug Points: " + gold + "1");
+				player.sendMessage(gray + "  + Thug Points: " + gold + "1");
 			}else if(newlevel >= 30){
 				this.addThugPoints(2);
-				player.sendMessage(gray + "   + Thug Points: " + gold + "2");
+				player.sendMessage(gray + "  + Thug Points: " + gold + "2");
 			}
 			double symbol = ((double)newlevel) / 10.0;
 			if(symbol % 1 == 0){
-				player.sendMessage(gray + "   + Chat Symbol: " + gold + TextUtils.getSymbolForLevel(newlevel));
+				player.sendMessage(gray + "  + Chat Symbol: " + gold + TextUtils.getSymbolForLevel(newlevel));
 			}
 			this.refreshScoreboard();
 		}
@@ -1641,29 +1780,29 @@ public class GPlayer implements CrewMember{
 			this.sendNotification("Level Up", "You are now level " + gold + newlevel + gray + "!");
 			for(Car c : Car.values()){
 				if(c.getMinimumLevel() == newlevel){
-					player.sendMessage(gray + "   + Car Unlock: " + gold + c.getName());
+					player.sendMessage(gray + "  + Car Unlock: " + gold + c.getName());
 				}
 			}
-			for(Mission m : Mission.values()){
+			for(Mission m : Mission.list()){
 				if(m.getMinimumLevel() == newlevel && m.getType() != MissionType.SIDE_MISSION){
-					player.sendMessage(gray + "   + Mission Unlock: " + gold + "\"" + m.getName() + "\"");
+					player.sendMessage(gray + "  + Mission Unlock: " + gold + "\"" + m.getName() + "\"");
 				}
 			}
 			for(Weapon w : Weapon.list()){
 				if(w.getMinimumLevel() == newlevel){
-					player.sendMessage(gray + "   + Weapon Unlock: " + gold + w.getName());
+					player.sendMessage(gray + "  + Weapon Unlock: " + gold + w.getName());
 				}
 			}
 			if(newlevel < 30){
 				this.addThugPoints(1);
-				player.sendMessage(gray + "   + Thug Points: " + gold + "1");
+				player.sendMessage(gray + "  + Thug Points: " + gold + "1");
 			}else if(newlevel >= 30){
 				this.addThugPoints(2);
-				player.sendMessage(gray + "   + Thug Points: " + gold + "2");
+				player.sendMessage(gray + "  + Thug Points: " + gold + "2");
 			}
 			double symbol = ((double)newlevel) / 10.0;
 			if(symbol % 1 == 0){
-				player.sendMessage(gray + "   + Chat Symbol: " + gold + TextUtils.getSymbolForLevel(newlevel));
+				player.sendMessage(gray + "  + Chat Symbol: " + gold + TextUtils.getSymbolForLevel(newlevel));
 			}
 			this.refreshScoreboard();
 		}
@@ -1831,6 +1970,14 @@ public class GPlayer implements CrewMember{
 	}
 	
 	/**
+	 * Get the missions the player has completed
+	 * @return The missions the player has completed
+	 */
+	public List<Integer> getCompletedMissions(){
+		return this.playerFile.getConfig().getIntegerList("completedMissions");
+	}
+	
+	/**
 	 * Set the last completion time of the side mission type
 	 * @param type - The side mission type to set the last completion time of
 	 */
@@ -1955,6 +2102,10 @@ public class GPlayer implements CrewMember{
 		return cars;
 	}
 	
+	/**
+	 * Check if the player owns any cars
+	 * @return True if the player has at least one car, false if not
+	 */
 	public boolean hasACar(){
 		if(this.getCars().size() > 0){
 			return true;
@@ -2280,6 +2431,67 @@ public class GPlayer implements CrewMember{
 	}
 	
 	/**
+	 * Check if the player can open the door at a location
+	 * @param loc - The location of the door
+	 * @return True if the player can open the door, false if not
+	 */
+	public boolean canOpenDoor(Location loc){
+		boolean allow = false;
+		if(this.hasApartment() == true){
+			boolean breakFirst = false;
+			for(Apartment a : this.getApartments()){
+				if(breakFirst == false){
+					for(Location l : a.getDoorLocations()){
+						if(l.getBlock().getLocation().getX() == loc.getX() 
+								&& l.getBlock().getLocation().getY() == loc.getY()
+								&& l.getBlock().getLocation().getZ() == loc.getZ()){
+							allow = true;
+							breakFirst = true;
+							break;
+						}
+					}
+				}else{
+					break;
+				}
+			}
+		}else if(this.crewHasApartment() == true){
+			boolean breakFirst = false;
+			boolean breakSecond = false;
+			for(Apartment a : this.getCrewApartments()){
+				if(breakFirst == false){
+					for(Location l : a.getDoorLocations()){
+						if(breakSecond == false){
+							if(l.getBlock().getLocation().getX() == loc.getX() 
+									&& l.getBlock().getLocation().getY() == loc.getY()
+									&& l.getBlock().getLocation().getZ() == loc.getZ()){
+								for(CrewMember m : this.getCrew().getMembers()){
+									if(m.getPlayer().hasApartment() == true){
+										if(m.getPlayer().ownsApartment(a) == true){
+											if(m.getPlayer().allowsApartmentForCrew() == true){
+												allow = true;
+											}else{
+												allow = false;
+											}
+											breakFirst = true;
+											breakSecond = true;
+											break;
+										}
+									}
+								}
+							}
+						}else{
+							break;
+						}
+					}
+				}else{
+					break;
+				}
+			}
+		}
+		return allow;
+	}
+	
+	/**
 	 * Get the player's crew
 	 * @return The player's crew
 	 */
@@ -2307,10 +2519,14 @@ public class GPlayer implements CrewMember{
 	 * @param crew - The crew to set as the player's crew
 	 */
 	public void setCrew(Crew crew){
-		if(crew != null){
-			this.getStats().crew = crew.getID();
+		if(player != null){
+			if(crew != null){
+				this.getStats().crew = crew.getID();
+			}else{
+				this.getStats().crew = -2;
+			}
 		}else{
-			this.getStats().crew = -2;
+			this.playerFile.setConfigValue("crew.id", crew.getID());
 		}
 	}
 	
@@ -2330,13 +2546,21 @@ public class GPlayer implements CrewMember{
 	 * Get the player's crew rank
 	 */
 	public CrewRank getCrewRank(){
-		if(this.getStats().crewrank.equalsIgnoreCase("unset")){
-			this.getStats().crewrank = this.playerFile.getConfig().getString("crew.rank");
-		}
-		if(this.getStats().crewrank != null){
-			return CrewRank.valueOf(this.getStats().crewrank.toUpperCase());
+		if(player != null){
+			if(this.getStats().crewrank == null){
+				this.getStats().crewrank = this.playerFile.getConfig().getString("crew.rank");
+			}
+			if(this.getStats().crewrank != null){
+				return CrewRank.valueOf(this.getStats().crewrank.toUpperCase());
+			}else{
+				return null;
+			}
 		}else{
-			return null;
+			if(this.playerFile.getConfig().getString("crew.rank") != null){
+				return CrewRank.valueOf(this.playerFile.getConfig().getString("crew.rank").toUpperCase());
+			}else{
+				return null;
+			}
 		}
 	}
 	
@@ -2345,7 +2569,11 @@ public class GPlayer implements CrewMember{
 	 * @param rank - The rank to set as the player's crew rank
 	 */
 	public void setRank(CrewRank rank){
-		this.getStats().crewrank = rank.toString().toUpperCase();
+		if(player != null){
+			this.getStats().crewrank = rank.toString().toUpperCase();
+		}else{
+			this.playerFile.setConfigValue("crew.rank", rank.toString().toUpperCase());
+		}
 	}
 	
 	/**

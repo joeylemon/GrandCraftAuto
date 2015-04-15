@@ -14,8 +14,8 @@ public class ObtainItemsObjective extends Objective{
 	private VillagerType toInvoke;
 	private String gangToInvoke;
 	
-	public ObtainItemsObjective(String desc, Dialogue dialogue, Material itemType, int amount, VillagerType toInvoke, String gangToInvoke){
-		super(desc, dialogue);
+	public ObtainItemsObjective(String desc, Dialogue dialogue, boolean revert, Material itemType, int amount, VillagerType toInvoke, String gangToInvoke){
+		super(desc, dialogue, revert);
 		this.itemType = itemType;
 		this.amount = amount;
 		this.toInvoke = toInvoke;

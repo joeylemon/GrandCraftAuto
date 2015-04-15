@@ -7,8 +7,8 @@ public class RobStationObjective extends Objective{
 
 	private int robPeriod;
 	
-	public RobStationObjective(String description, Dialogue dialogue, int robPeriod){
-		super(description, dialogue);
+	public RobStationObjective(String description, Dialogue dialogue, boolean revert, int robPeriod){
+		super(description, dialogue, revert);
 		this.robPeriod = robPeriod;
 	}
 	
